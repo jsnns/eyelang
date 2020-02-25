@@ -10,6 +10,8 @@ pub enum TokenType {
     Add,
     Proc,
     Main,
+    Comma,
+    Return,
 }
 
 impl TokenType {
@@ -28,11 +30,17 @@ impl std::string::ToString for TokenType {
         (match self {
             TokenType::Symbol(_) => "Symbol",
             TokenType::Number(_) => "Number",
-            TokenType::Semicolon => ";",
-            TokenType::Add => "Add",
+            TokenType::Type(_) => "Type",
+            TokenType::Add => "+",
             TokenType::Main => "Main",
             TokenType::Proc => "Proc",
-            _ => "Not Defined",
+            TokenType::Return => "Return",
+            TokenType::Comma => "Comma",
+            TokenType::LBrace => "{",
+            TokenType::RBrace => "}",
+            TokenType::LParen => "(",
+            TokenType::RParen => ")",
+            TokenType::Semicolon => ";",
         })
         .to_string()
     }
