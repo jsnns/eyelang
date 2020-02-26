@@ -30,6 +30,10 @@ impl Position {
         self.current_char() == c
     }
 
+    fn is_whitespace(&self) -> bool {
+        self.current_char_is(' ') || self.current_char_is('\n') || self.current_char_is('\t')
+    }
+
     fn current_char(&self) -> char {
         self.text
             .chars()
@@ -40,7 +44,11 @@ impl Position {
     fn re_find(&self, re: &Result<regex::Regex, regex::Error>) -> Result<String, TokenError> {
         if let Ok(regex) = re {
             let data = self.next();
-            Ok(regex.find(&data).unwrap().as_str().to_string())
+            if let Some(result) = regex.find(&data) {
+                Ok(result.as_str().to_string())
+            } else {
+                Err(TokenError)
+            }
         } else {
             Ok("".to_string())
         }
@@ -65,35 +73,31 @@ pub fn tokenize(source_text: String) -> Result<Vec<TokenType>, TokenError> {
     let num_regex_result = Regex::new(r"^[-]?\d+");
     let symbol_regex_result = Regex::new(r"^[A-z][A-z0-9_]*");
     let type_regex_result = Regex::new(r"^: [0-9A-z]+");
+    // TODO: this is gross
     while data.has_chars_left() {
         let next_data_str = data.next();
-        if data.current_char_is(' ') {
+
+        if let Some(token) = match data.current_char() {
+            '+' => Some(TokenType::Add),
+            ';' => Some(TokenType::Semicolon),
+            '}' => Some(TokenType::RBrace),
+            '{' => Some(TokenType::LBrace),
+            '(' => Some(TokenType::LParen),
+            ')' => Some(TokenType::RParen),
+            ',' => Some(TokenType::Comma),
+            _ => None,
+        } {
+            data.increment(1);
+            tokens.push(token)
+        }
+
+        // match whitespace characters
+        if data.is_whitespace() {
             data.increment(1);
         }
-        if data.current_char_is('\n') {
-            data.increment(1);
-        } else if data.current_char_is('+') {
-            data.increment(1);
-            tokens.push(TokenType::Add)
-        } else if data.current_char_is(';') {
-            data.increment(1);
-            tokens.push(TokenType::Semicolon);
-        } else if data.current_char_is('}') {
-            data.increment(1);
-            tokens.push(TokenType::RBrace);
-        } else if data.current_char_is('{') {
-            data.increment(1);
-            tokens.push(TokenType::LBrace);
-        } else if data.current_char_is('(') {
-            data.increment(1);
-            tokens.push(TokenType::LParen);
-        } else if data.current_char_is(')') {
-            data.increment(1);
-            tokens.push(TokenType::RParen);
-        } else if data.current_char_is(',') {
-            data.increment(1);
-            tokens.push(TokenType::Comma);
-        } else if is_match(&next_data_str, &Regex::new(r"^proc")) {
+
+        // match keywords
+        if is_match(&next_data_str, &Regex::new(r"^proc")) {
             data.increment(4);
             tokens.push(TokenType::Proc);
         } else if is_match(&next_data_str, &Regex::new(r"^main")) {
@@ -102,7 +106,9 @@ pub fn tokenize(source_text: String) -> Result<Vec<TokenType>, TokenError> {
         } else if is_match(&next_data_str, &Regex::new(r"^return")) {
             data.increment(6);
             tokens.push(TokenType::Return);
-        } else if is_match(&next_data_str, &num_regex_result) {
+        }
+        // variable sequences ie numbers, symbols, strings
+        if is_match(&next_data_str, &num_regex_result) {
             let num = data
                 .re_find(&num_regex_result)
                 .unwrap_or("".to_string())
@@ -110,12 +116,10 @@ pub fn tokenize(source_text: String) -> Result<Vec<TokenType>, TokenError> {
             data.increment_by_str(num.clone());
             tokens.push(TokenType::Number(num.parse().unwrap()));
         } else if is_match(&next_data_str, &symbol_regex_result) {
-            let symbol_name = data
-                .re_find(&symbol_regex_result)
-                .unwrap_or("".to_string())
-                .to_string();
-            data.increment_by_str(symbol_name.clone());
-            tokens.push(TokenType::Symbol(symbol_name));
+            if let Ok(symbol_name) = data.re_find(&symbol_regex_result) {
+                data.increment_by_str(symbol_name.clone());
+                tokens.push(TokenType::Symbol(symbol_name));
+            }
         } else if is_match(&next_data_str, &type_regex_result) {
             let type_value = data
                 .re_find(&type_regex_result)
@@ -125,8 +129,6 @@ pub fn tokenize(source_text: String) -> Result<Vec<TokenType>, TokenError> {
 
             let value_without_colon = type_value[1..type_value.len()].to_string();
             tokens.push(TokenType::Type(value_without_colon));
-        } else {
-            println!("Nothing for== {}", data.next());
         }
     }
 
