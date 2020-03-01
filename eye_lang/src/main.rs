@@ -1,6 +1,9 @@
+mod ast;
 mod error;
 mod file;
+mod interpreter;
 mod lexer;
+mod parser;
 mod token;
 
 fn main() {
@@ -12,6 +15,8 @@ fn main() {
 
     let first_source_path = args[1].to_string();
     let source_text = file::read_source_file(first_source_path, root_dir);
-
-    println!("{:?}", lexer::tokenize(source_text));
+    if let Ok(tokens) = lexer::tokenize(source_text) {
+        let ast = parser::parse_tokens(tokens);
+        interpreter::interpret(ast);
+    }
 }

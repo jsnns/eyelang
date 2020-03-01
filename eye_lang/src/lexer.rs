@@ -1,8 +1,9 @@
 extern crate regex;
 use regex::Regex;
 
+use crate::ast::BinaryOperator;
 use crate::error::TokenError;
-use crate::token::TokenType;
+use crate::token::Token;
 
 struct Position {
     index: u64,
@@ -63,8 +64,8 @@ fn is_match(next_data_str: &Box<String>, re: &Result<regex::Regex, regex::Error>
     }
 }
 
-pub fn tokenize(source_text: String) -> Result<Vec<TokenType>, TokenError> {
-    let mut tokens: Vec<TokenType> = vec![];
+pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
+    let mut tokens: Vec<Token> = vec![];
     let mut data = Position {
         index: 0,
         text: source_text,
@@ -78,47 +79,48 @@ pub fn tokenize(source_text: String) -> Result<Vec<TokenType>, TokenError> {
         let next_data_str = data.next();
 
         if let Some(token) = match data.current_char() {
-            '+' => Some(TokenType::Add),
-            ';' => Some(TokenType::Semicolon),
-            '}' => Some(TokenType::RBrace),
-            '{' => Some(TokenType::LBrace),
-            '(' => Some(TokenType::LParen),
-            ')' => Some(TokenType::RParen),
-            ',' => Some(TokenType::Comma),
+            '+' => Some(Token::Operator(BinaryOperator::Add)),
+            '-' => Some(Token::Operator(BinaryOperator::Subtract)),
+            '*' => Some(Token::Operator(BinaryOperator::Multiply)),
+            '/' => Some(Token::Operator(BinaryOperator::Divide)),
+            ';' => Some(Token::Semicolon),
+            '}' => Some(Token::RBrace),
+            '{' => Some(Token::LBrace),
+            '(' => Some(Token::LParen),
+            ')' => Some(Token::RParen),
+            ',' => Some(Token::Comma),
             _ => None,
         } {
             data.increment(1);
             tokens.push(token)
         }
-
         // match whitespace characters
-        if data.is_whitespace() {
+        else if data.is_whitespace() {
             data.increment(1);
         }
-
         // match keywords
-        if is_match(&next_data_str, &Regex::new(r"^proc")) {
+        else if is_match(&next_data_str, &Regex::new(r"^proc")) {
             data.increment(4);
-            tokens.push(TokenType::Proc);
+            tokens.push(Token::Proc);
         } else if is_match(&next_data_str, &Regex::new(r"^main")) {
             data.increment(4);
-            tokens.push(TokenType::Main);
+            tokens.push(Token::Main);
         } else if is_match(&next_data_str, &Regex::new(r"^return")) {
             data.increment(6);
-            tokens.push(TokenType::Return);
+            tokens.push(Token::Return);
         }
         // variable sequences ie numbers, symbols, strings
-        if is_match(&next_data_str, &num_regex_result) {
+        else if is_match(&next_data_str, &num_regex_result) {
             let num = data
                 .re_find(&num_regex_result)
                 .unwrap_or("".to_string())
                 .to_string();
             data.increment_by_str(num.clone());
-            tokens.push(TokenType::Number(num.parse().unwrap()));
+            tokens.push(Token::Number(num.parse().unwrap()));
         } else if is_match(&next_data_str, &symbol_regex_result) {
             if let Ok(symbol_name) = data.re_find(&symbol_regex_result) {
                 data.increment_by_str(symbol_name.clone());
-                tokens.push(TokenType::Symbol(symbol_name));
+                tokens.push(Token::Symbol(symbol_name));
             }
         } else if is_match(&next_data_str, &type_regex_result) {
             let type_value = data
@@ -128,7 +130,9 @@ pub fn tokenize(source_text: String) -> Result<Vec<TokenType>, TokenError> {
             data.increment_by_str(type_value.clone());
 
             let value_without_colon = type_value[1..type_value.len()].to_string();
-            tokens.push(TokenType::Type(value_without_colon));
+            tokens.push(Token::Type(value_without_colon));
+        } else {
+            panic!("Could not find token for {}", next_data_str);
         }
     }
 
