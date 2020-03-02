@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Eye",
+  "patterns": [
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#strings"
+    }
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.eye",
+          "match": "\\b(print|proc|return)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.eye",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.eye",
+          "match": "\\\\."
+        }
+      ]
+    }
+  },
+  "scopeName": "source.eye"
+}
