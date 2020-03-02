@@ -1,9 +1,11 @@
 use crate::ast::BinaryOperator;
 
+#[derive(Clone, PartialEq)]
 pub enum Token {
     Symbol(String),
     Type(String),
     Number(i32),
+    Bool(bool),
     Operator(BinaryOperator),
     LParen,
     RParen,
@@ -23,6 +25,7 @@ impl Token {
             Token::Type(value) => (self, value.to_string()),
             Token::Number(value) => (self, value.to_string()),
             Token::Operator(value) => (self, value.to_string()),
+            Token::Bool(value) => (self, value.to_string()),
             _ => (self, "".to_string()),
         }
     }
@@ -30,11 +33,12 @@ impl Token {
 
 impl std::string::ToString for Token {
     fn to_string(&self) -> String {
-        (match self {
+        let str: &str = match self {
             Token::Symbol(_) => "Symbol",
+            Token::Bool(_) => "Bool",
             Token::Number(_) => "Number",
             Token::Type(_) => "Type",
-            Token::Operator(_) => "Operator",
+            Token::Operator(..) => "Operator",
             Token::Main => "Main",
             Token::Proc => "Proc",
             Token::Return => "Return",
@@ -44,8 +48,9 @@ impl std::string::ToString for Token {
             Token::LParen => "(",
             Token::RParen => ")",
             Token::Semicolon => ";",
-        })
-        .to_string()
+        };
+
+        str.to_string()
     }
 }
 

@@ -4,7 +4,7 @@ use crate::ast::AST;
 
 fn value_from_ast(ast: AST) -> PrimitiveValue {
     match ast {
-        AST::Num { value } => PrimitiveValue::Num(value),
+        AST::Number { value } => PrimitiveValue::Num(value),
         _ => panic!("Operator value could not be determined {:?}", ast),
     }
 }
@@ -24,13 +24,25 @@ fn apply_binary_operator(left: AST, right: AST, operator: BinaryOperator) -> Pri
     }
 }
 
-fn run_ast(ast: Box<AST>) {
+fn run_ast(ast: Box<AST>) -> Option<PrimitiveValue> {
     match *ast {
         AST::Binary {
             operator,
             left,
             right,
-        } => println!("{:?}", apply_binary_operator(*left, *right, operator)),
+        } => Some(apply_binary_operator(*left, *right, operator)),
+        AST::Proc { symbol, value } => {
+            for ast in value {
+                run_ast(ast);
+            }
+            None
+        }
+        AST::Return { value } => {
+            println!("Return value: {:?}", run_ast(value).unwrap());
+            None
+        }
+        AST::Semicolon => None,
+        AST::Bool { value } => Some(PrimitiveValue::Bool(value)),
         _ => panic!("AST branch not implemented {:?}", ast),
     }
 }

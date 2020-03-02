@@ -108,6 +108,12 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
         } else if is_match(&next_data_str, &Regex::new(r"^return")) {
             data.increment(6);
             tokens.push(Token::Return);
+        } else if is_match(&next_data_str, &Regex::new(r"^true")) {
+            data.increment(4);
+            tokens.push(Token::Bool(true));
+        } else if is_match(&next_data_str, &Regex::new(r"^false")) {
+            data.increment(5);
+            tokens.push(Token::Bool(false));
         }
         // variable sequences ie numbers, symbols, strings
         else if is_match(&next_data_str, &num_regex_result) {

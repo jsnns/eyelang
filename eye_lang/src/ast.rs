@@ -6,18 +6,36 @@ pub enum AST {
         left: Box<AST>,
         right: Box<AST>,
     },
-    Call,
-    Assign,
-    Num {
+    Call {
+        func: String,
+        args: Vec<Box<AST>>,
+    },
+    Assign {
+        symbol: String,
+        value: Box<AST>,
+    },
+    Proc {
+        symbol: String,
+        value: Vec<Box<AST>>,
+    },
+    Return {
+        value: Box<AST>,
+    },
+    Number {
         value: i32,
     },
-    String,
-    Bool,
-    Let,
+    String {
+        value: String,
+    },
+    Bool {
+        value: bool,
+    },
     If,
     Program {
         program: Vec<Box<AST>>,
     },
+    EOF,
+    Semicolon,
 }
 
 impl std::string::ToString for AST {
@@ -27,10 +45,15 @@ impl std::string::ToString for AST {
                 operator,
                 left,
                 right,
-            } => format!("{:?} {:?}, {}", left, right, operator.to_string()),
-            AST::Num { value } => format!("{}", value),
+            } => format!("{:?} {} {:?}", left, operator.to_string(), right),
+            AST::Number { value } => format!("{}", value),
             AST::Program { program } => format!("Program: {:?}", program),
-            _ => format!(""),
+            AST::Call { func, args } => format!("Call {}({:?})", func, args),
+            AST::Proc { symbol, value } => format!("Proc {} {:?}", symbol, value),
+            AST::Return { value } => format!("Return {:?}", value),
+            AST::Bool { value } => format!("Bool {}", value),
+            AST::Semicolon => format!(";"),
+            _ => format!("N/a"),
         }
     }
 }
@@ -41,7 +64,7 @@ impl std::fmt::Debug for AST {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum BinaryOperator {
     Add,
     Subtract,
