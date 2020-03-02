@@ -114,6 +114,9 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
         } else if is_match(&next_data_str, &Regex::new(r"^false")) {
             data.increment(5);
             tokens.push(Token::Bool(false));
+        } else if is_match(&next_data_str, &Regex::new(r"^print")) {
+            data.increment(5);
+            tokens.push(Token::Print);
         }
         // variable sequences ie numbers, symbols, strings
         else if is_match(&next_data_str, &num_regex_result) {

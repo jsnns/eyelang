@@ -36,6 +36,9 @@ pub enum AST {
     },
     EOF,
     Semicolon,
+    Print {
+        value: Box<AST>,
+    },
 }
 
 impl std::string::ToString for AST {
@@ -50,10 +53,11 @@ impl std::string::ToString for AST {
             AST::Program { program } => format!("Program: {:?}", program),
             AST::Call { func, args } => format!("Call {}({:?})", func, args),
             AST::Proc { symbol, value } => format!("Proc {} {:?}", symbol, value),
-            AST::Return { value } => format!("Return {:?}", value),
+            AST::Return { value } => format!("Return <{:?}>", value),
             AST::Bool { value } => format!("Bool {}", value),
+            AST::Print { value } => format!("Print {:?}", value),
             AST::Semicolon => format!(";"),
-            _ => format!("N/a"),
+            _ => format!("N/A"),
         }
     }
 }
@@ -85,11 +89,12 @@ impl std::string::ToString for BinaryOperator {
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum PrimitiveValue {
     String(String),
     Num(i32),
     Bool(bool),
+    Block(Vec<AST>),
 }
 
 #[derive(Debug, Clone)]
@@ -162,6 +167,7 @@ impl std::string::ToString for PrimitiveValue {
             PrimitiveValue::Bool(val) => val.to_string(),
             PrimitiveValue::String(val) => val.to_string(),
             PrimitiveValue::Num(val) => val.to_string(),
+            PrimitiveValue::Block(body) => format!("{:?}", body),
         }
     }
 }

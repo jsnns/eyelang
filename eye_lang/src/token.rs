@@ -16,6 +16,7 @@ pub enum Token {
     Main,
     Comma,
     Return,
+    Print,
 }
 
 impl Token {
@@ -48,6 +49,7 @@ impl std::string::ToString for Token {
             Token::LParen => "(",
             Token::RParen => ")",
             Token::Semicolon => ";",
+            Token::Print => "Print",
         };
 
         str.to_string()

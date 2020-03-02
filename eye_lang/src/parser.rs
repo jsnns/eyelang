@@ -101,13 +101,39 @@ impl ParseState {
                     self.next();
                     return AST::Semicolon;
                 }
+                Token::Symbol(symbol) => {
+                    self.next();
+                    if self.is_tok(&Token::LParen) {
+                        self.next();
+                        return self.maybe_binary(self.parse_call(symbol.to_string()), 0);
+                    } else {
+                        AST::Assign {
+                            symbol: symbol.to_string(),
+                            value: Box::from(self.parse_atom()),
+                        }
+                    }
+                }
+                Token::Print => {
+                    self.next();
+                    AST::Print {
+                        value: Box::from(self.parse_atom()),
+                    }
+                }
                 _ => panic!(
-                    "Parse_atom unimplemented for {}",
+                    "parser::parse_atom unimplemented for {}",
                     self.current().to_string()
                 ),
             },
             0,
         );
+    }
+
+    fn parse_call(&self, symbol: String) -> AST {
+        self.skip(&Token::RParen);
+        AST::Call {
+            func: symbol,
+            args: vec![],
+        }
     }
 
     fn parse_proc(&self) -> AST {
@@ -149,7 +175,7 @@ impl ParseState {
 }
 
 pub fn parse_tokens(tokens: Vec<Token>) -> AST {
-    println!("Tokens: {:?} \n", tokens);
+    // println!("Tokens: {:?} \n", tokens);
     let mut prog: Vec<Box<AST>> = vec![];
     let parse_state = ParseState {
         tokens: tokens,
@@ -163,7 +189,7 @@ pub fn parse_tokens(tokens: Vec<Token>) -> AST {
 
     let prog = AST::Program { program: prog };
 
-    println!("{:?}", prog);
+    // println!("{:?}", prog);
 
     return prog;
 }
