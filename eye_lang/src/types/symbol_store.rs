@@ -1,4 +1,4 @@
-use crate::types::primitive_type::PrimitiveValue;
+use crate::types::primitive_value::PrimitiveValue;
 use std::collections::HashMap;
 
 pub type Identifier = String;

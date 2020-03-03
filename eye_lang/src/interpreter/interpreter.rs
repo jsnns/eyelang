@@ -2,7 +2,7 @@ use crate::types::ast::FunctionBody;
 use crate::types::ast::AST;
 use crate::types::binary_operator::BinaryOperator;
 use crate::types::error::RuntimeError;
-use crate::types::primitive_type::PrimitiveValue;
+use crate::types::primitive_value::PrimitiveValue;
 use crate::types::symbol_store::SymbolStore;
 
 use std::time::Instant;

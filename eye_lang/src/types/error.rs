@@ -1,4 +1,4 @@
-use crate::types::primitive_type::PrimitiveValue;
+use crate::types::primitive_value::PrimitiveValue;
 
 #[derive(Debug)]
 pub struct TokenError;
