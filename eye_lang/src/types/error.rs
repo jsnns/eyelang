@@ -1,17 +1,14 @@
 use crate::types::primitive_type::PrimitiveValue;
-pub struct TokenError;
 
-impl std::fmt::Debug for TokenError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Token Error")
-    }
-}
+#[derive(Debug)]
+pub struct TokenError;
 
 #[derive(Debug, Clone)]
 pub struct NotImplemented {
     a: String,
     b: String,
 }
+
 impl NotImplemented {
     pub fn from(a: &PrimitiveValue, b: &PrimitiveValue) -> NotImplemented {
         NotImplemented {
