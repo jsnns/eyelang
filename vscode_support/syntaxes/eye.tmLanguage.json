@@ -13,6 +13,9 @@
     },
     {
       "include": "#constants"
+    },
+    {
+      "include": "#func"
     }
   ],
   "repository": {
@@ -20,7 +23,7 @@
       "patterns": [
         {
           "name": "keyword.control.eye",
-          "match": "\\b(print|proc|return|set|if|else)\\b"
+          "match": "\\b(print|return|set|if|else)\\b"
         }
       ]
     },
@@ -51,6 +54,20 @@
       "name": "comment.line.eye",
       "begin": "//",
       "end": "\n"
+    },
+    "func": {
+      "patterns": [
+        {
+          "name": "keyword.control.eye",
+          "match": "proc"
+        },
+        {
+          "name": "variable.name.eye",
+          "begin": "\\bproc\\b",
+          "end": "\\b(\\b",
+          "match": "\\b[A-z][A-z0-9_]*\\b"
+        }
+      ]
     }
   },
   "scopeName": "source.eye"

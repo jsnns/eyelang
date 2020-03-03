@@ -9,7 +9,10 @@ proc fib(n) {
     return val;
 }
 
-// val should not exist
-print val;
+proc add(a, b) {
+    return a + b;
+}
 
-print fib(10);
+set add_ = add;
+
+print add_(1, 2);
