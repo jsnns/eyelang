@@ -1,6 +1,6 @@
+use crate::types::ast::FunctionBody;
 use crate::types::ast::AST;
 use crate::types::binary_operator::BinaryOperator;
-use crate::types::body::Block;
 use crate::types::error::RuntimeError;
 use crate::types::primitive_type::PrimitiveValue;
 
@@ -139,7 +139,7 @@ fn run_ast(
 
             symbols.insert(
                 symbol,
-                PrimitiveValue::Block(Block {
+                PrimitiveValue::Function(FunctionBody {
                     body: body,
                     args: args,
                 }),
@@ -153,7 +153,7 @@ fn run_ast(
                 });
             }
 
-            if let Some(PrimitiveValue::Block(block)) = symbols.get(&func) {
+            if let Some(PrimitiveValue::Function(block)) = symbols.get(&func) {
                 // this sets up the function's "scope"
                 let mut f_symbols = symbols.clone();
 

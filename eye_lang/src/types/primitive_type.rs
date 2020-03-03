@@ -1,4 +1,4 @@
-use crate::types::body::Block;
+use crate::types::ast::FunctionBody;
 use crate::types::error::NotImplemented;
 
 #[allow(dead_code)]
@@ -7,7 +7,7 @@ pub enum PrimitiveValue {
     Str(String),
     Num(i32),
     Bool(bool),
-    Block(Block),
+    Function(FunctionBody),
 }
 
 type OperatorValue<T> = Result<T, NotImplemented>;
@@ -76,7 +76,7 @@ impl std::string::ToString for PrimitiveValue {
             PrimitiveValue::Bool(val) => val.to_string(),
             PrimitiveValue::Str(val) => val.to_string(),
             PrimitiveValue::Num(val) => val.to_string(),
-            PrimitiveValue::Block(block) => format!("({:?}):{{{:?}}}", block.args, block.body),
+            PrimitiveValue::Function(block) => format!("({:?}):{{{:?}}}", block.args, block.body),
         }
     }
 }
