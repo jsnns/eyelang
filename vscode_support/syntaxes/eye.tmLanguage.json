@@ -3,6 +3,9 @@
   "name": "Eye",
   "patterns": [
     {
+      "include": "#comments"
+    },
+    {
       "include": "#keywords"
     },
     {
@@ -43,6 +46,11 @@
           "match": "\\\\."
         }
       ]
+    },
+    "comments": {
+      "name": "comment.line.eye",
+      "begin": "//",
+      "end": "\n"
     }
   },
   "scopeName": "source.eye"

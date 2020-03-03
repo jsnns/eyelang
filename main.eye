@@ -5,8 +5,11 @@ proc fib(n) {
         return 1;
     }
 
-    return fib(n-1) + fib(n-2);
+    set val = fib(n-1) + fib(n-2);
+    return val;
 }
 
-print "test";
+// val should not exist
+print val;
+
 print fib(10);

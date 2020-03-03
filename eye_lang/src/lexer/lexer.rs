@@ -83,12 +83,21 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
     let symbol_regex_result = Regex::new(r"^[A-z][A-z0-9_]*");
     let type_regex_result = Regex::new(r"^: [0-9A-z]+");
     let string_regex_result = Regex::new(r#"^"([^"]|\\")*""#);
+    let comment_regex_result = Regex::new(r"^//.*");
     // TODO: this is gross
     while data.has_chars_left() {
         let next_data_str = data.next();
 
+        // comments
+        if is_match(&next_data_str, &comment_regex_result) {
+            // skip the comment
+            data.increment_by_str(
+                data.re_find(&comment_regex_result)
+                    .unwrap_or("".to_string()),
+            );
+        }
         // multi-char operators
-        if data.is_keyword("==") {
+        else if data.is_keyword("==") {
             data.increment(2);
             tokens.push(Token::Operator(BinaryOperator::IsEq))
         } else if data.is_keyword("!=") {

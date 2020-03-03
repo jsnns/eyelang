@@ -189,9 +189,11 @@ fn run_ast(ast: AST, symbols: &mut SymbolStore) -> Result<Option<PrimitiveValue>
             if let Some(value) = symbols.get(&identifier) {
                 let new_value = value.clone();
                 return Ok(Some(new_value));
+            } else {
+                Err(RuntimeError {
+                    message: format!("Tried to access undefined symbol: {}", identifier),
+                })
             }
-
-            Ok(None)
         }
         AST::If { this, elifs, el } => {
             if let Some(PrimitiveValue::Bool(val)) =
