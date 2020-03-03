@@ -1,7 +1,7 @@
 use crate::types::binary_operator::BinaryOperator;
+use crate::types::symbol_store::Identifier;
 
 pub type Block = Vec<Box<AST>>;
-pub type Identifier = String;
 
 #[derive(Debug, Clone)]
 pub struct FunctionBody {

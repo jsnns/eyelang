@@ -3,14 +3,14 @@ use crate::types::ast::AST;
 use crate::types::binary_operator::BinaryOperator;
 use crate::types::error::RuntimeError;
 use crate::types::primitive_type::PrimitiveValue;
+use crate::types::symbol_store::SymbolStore;
 
-use std::collections::HashMap;
 use std::time::Instant;
 
 /**
  * Recursively run an AST program
  */
-pub fn interpret(root_program: AST, mut symbols: HashMap<String, PrimitiveValue>) {
+pub fn interpret(root_program: AST, mut symbols: SymbolStore) {
     if let AST::Program { program } = root_program {
         let now = Instant::now();
         match run_body_and_return(program, &mut symbols) {
@@ -23,10 +23,7 @@ pub fn interpret(root_program: AST, mut symbols: HashMap<String, PrimitiveValue>
 }
 
 // Get a primitive value from an AST
-fn value_from_ast(
-    ast: AST,
-    symbols: &mut HashMap<String, PrimitiveValue>,
-) -> Result<PrimitiveValue, RuntimeError> {
+fn value_from_ast(ast: AST, symbols: &mut SymbolStore) -> Result<PrimitiveValue, RuntimeError> {
     let new_ast = ast.clone();
     match ast {
         AST::Number { value } => Ok(PrimitiveValue::Num(value)),
@@ -72,7 +69,7 @@ fn apply_binary_operator(
     left: AST,
     right: AST,
     operator: BinaryOperator,
-    symbols: &mut HashMap<String, PrimitiveValue>,
+    symbols: &mut SymbolStore,
 ) -> Result<PrimitiveValue, RuntimeError> {
     let left_value = value_from_ast(left, symbols)?;
     let right_value = value_from_ast(right, symbols)?;
@@ -90,7 +87,7 @@ fn apply_binary_operator(
  */
 fn run_body_and_return(
     body: Vec<Box<AST>>,
-    symbols: &mut HashMap<String, PrimitiveValue>,
+    symbols: &mut SymbolStore,
 ) -> Result<Option<PrimitiveValue>, RuntimeError> {
     for ast in body {
         let new_ast = *ast.clone();
@@ -114,10 +111,7 @@ fn run_body_and_return(
     Ok(None)
 }
 
-fn run_ast(
-    ast: AST,
-    symbols: &mut HashMap<String, PrimitiveValue>,
-) -> Result<Option<PrimitiveValue>, RuntimeError> {
+fn run_ast(ast: AST, symbols: &mut SymbolStore) -> Result<Option<PrimitiveValue>, RuntimeError> {
     match ast {
         AST::Number { value } => Ok(Some(PrimitiveValue::Num(value))),
         AST::Bool { value } => Ok(Some(PrimitiveValue::Bool(value))),

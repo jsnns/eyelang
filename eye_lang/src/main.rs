@@ -5,7 +5,7 @@ mod parser;
 mod types;
 
 use std::collections::HashMap;
-use types::primitive_type::PrimitiveValue;
+use types::symbol_store::SymbolStore;
 
 fn main() {
     let root_dir = std::env::current_dir()
@@ -23,7 +23,7 @@ fn main() {
     if let Ok(tokens) = lexer::tokenize(source_text) {
         let ast = parser::build_program(tokens);
 
-        let symbols: HashMap<String, PrimitiveValue> = HashMap::new();
+        let symbols: SymbolStore = HashMap::new();
         interpreter::interpret(ast, symbols);
     }
 }
