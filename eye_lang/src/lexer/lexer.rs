@@ -54,6 +54,7 @@ impl Position {
             Ok("".to_string())
         }
     }
+
     fn is_keyword(&self, s: &str) -> bool {
         if let Ok(regex) = Regex::new(&format!(r"^{}", s.to_string())) {
             regex.is_match(&self.next().clone().to_string())
@@ -86,6 +87,7 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
     while data.has_chars_left() {
         let next_data_str = data.next();
 
+        // multi-char operators
         if data.is_keyword("==") {
             data.increment(2);
             tokens.push(Token::Operator(BinaryOperator::IsEq))
@@ -93,7 +95,7 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
             data.increment(2);
             tokens.push(Token::Operator(BinaryOperator::IsNEq))
         }
-        // operator
+        // single char operators
         else if let Some(token) = match data.current_char() {
             '+' => Some(Token::Operator(BinaryOperator::Add)),
             '-' => Some(Token::Operator(BinaryOperator::Subtract)),
@@ -115,7 +117,7 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
         else if data.is_whitespace() {
             data.increment(1);
         }
-        // match keywords
+        // keywords
         else if data.is_keyword("proc") {
             data.increment(4);
             tokens.push(Token::Proc);
