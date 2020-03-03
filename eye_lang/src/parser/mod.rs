@@ -1,2 +1,2 @@
 mod parser;
-pub use self::parser::parse_tokens;
+pub use self::parser::build_program;

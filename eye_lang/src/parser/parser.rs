@@ -3,7 +3,7 @@ use crate::types::binary_operator::BinaryOperator;
 use crate::types::token::Token;
 use std::cell::Cell;
 
-pub fn parse_tokens(tokens: Vec<Token>) -> AST {
+pub fn build_program(tokens: Vec<Token>) -> AST {
     let mut prog: Vec<Box<AST>> = vec![];
     let parse_state = ParseState {
         tokens: tokens,
