@@ -23,7 +23,7 @@
       "patterns": [
         {
           "name": "keyword.control.eye",
-          "match": "\\b(print|return|set|if|else)\\b"
+          "match": "\\b(print|return|set|if|else|do)\\b"
         }
       ]
     },

@@ -127,7 +127,10 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
             data.increment(1);
         }
         // keywords
-        else if data.is_keyword("proc") {
+        else if data.is_keyword("do") {
+            data.increment(2);
+            tokens.push(Token::Do);
+        } else if data.is_keyword("proc") {
             data.increment(4);
             tokens.push(Token::Proc);
         } else if data.is_keyword("return") {

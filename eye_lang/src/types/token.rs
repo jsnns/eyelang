@@ -20,6 +20,7 @@ pub enum Token {
     Set,
     If,
     Else,
+    Do,
 }
 
 impl Token {
@@ -57,6 +58,7 @@ impl std::string::ToString for Token {
             Token::Set => "Set",
             Token::If => "If",
             Token::Else => "Else",
+            Token::Do => "Do",
         };
 
         str.to_string()

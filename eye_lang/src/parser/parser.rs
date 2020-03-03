@@ -5,6 +5,7 @@ use crate::types::token::Token;
 use std::cell::Cell;
 
 pub fn build_program(tokens: Vec<Token>) -> AST {
+    println!("Tokens: {:?}", tokens);
     let mut prog: Vec<Box<AST>> = vec![];
     let parse_state = ParseState {
         tokens: tokens,
@@ -146,6 +147,10 @@ impl ParseState {
                     self.next();
                     self.parse_if()
                 }
+                Token::Do => {
+                    self.next();
+                    self.parse_do()
+                }
                 _ => panic!(
                     "parser::parse_atom unimplemented for {}",
                     self.current().to_string()
@@ -153,6 +158,23 @@ impl ParseState {
             },
             0,
         );
+    }
+
+    fn parse_do(&self) -> AST {
+        let count = self.parse_atom();
+        if let Token::Symbol(identifier) = self.current() {
+            self.next();
+            AST::Do {
+                count: Box::from(count),
+                identifier: identifier.clone(),
+                body: self.parse_proc_body(),
+            }
+        } else {
+            panic!(
+                "Do loops must have an index symbol found: {:?}",
+                self.current()
+            );
+        }
     }
 
     fn parse_if(&self) -> AST {

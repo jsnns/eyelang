@@ -93,6 +93,15 @@ fn run_body_and_return(
         let new_ast = *ast.clone();
         match *ast {
             AST::Return { value: _ } => return run_ast(new_ast, symbols),
+            AST::Do {
+                count: _,
+                body: _,
+                identifier: _,
+            } => {
+                if let Some(val) = run_ast(new_ast, symbols)? {
+                    return Ok(Some(val));
+                }
+            }
             AST::If {
                 this: _,
                 elifs: _,
@@ -227,6 +236,23 @@ fn run_ast(ast: AST, symbols: &mut SymbolStore) -> Result<Option<PrimitiveValue>
                 }
             }
             Ok(None)
+        }
+        AST::Do {
+            count,
+            body,
+            identifier,
+        } => {
+            if let Ok(PrimitiveValue::Num(count)) = value_from_ast(*count, &mut symbols.clone()) {
+                let mut f_symbols = symbols.clone();
+                for i in 0..count {
+                    f_symbols.insert(identifier.clone(), PrimitiveValue::Num(i));
+                    // only return if a return value is given
+                    if let Some(return_value) = run_body_and_return(body.clone(), &mut f_symbols)? {
+                        return Ok(Some(return_value));
+                    }
+                }
+            }
+            return Ok(None);
         }
         AST::EOF => Ok(None),
         AST::Program { program: _ } => Err(RuntimeError {

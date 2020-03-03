@@ -61,6 +61,11 @@ pub enum AST {
     Program {
         program: Block,
     },
+    Do {
+        count: Box<AST>,
+        identifier: Identifier,
+        body: Block,
+    },
     EOF,
     Semicolon,
 }
@@ -94,6 +99,11 @@ impl std::string::ToString for AST {
                 body,
                 args,
             } => format!("Proc {} {:?}({:?})", identifier, body, args),
+            AST::Do {
+                count,
+                identifier,
+                body,
+            } => format!("Do {:?}:{} {:?}", count, identifier, body),
         }
     }
 }
