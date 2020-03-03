@@ -37,22 +37,25 @@ fn value_from_ast(
             right,
             operator,
         } => apply_binary_operator(*left, *right, operator, symbols),
-        AST::Call { func, args: _ } => {
+        AST::Call {
+            identifier,
+            args: _,
+        } => {
             if let Some(value) = run_ast(new_ast, symbols)? {
                 return Ok(value);
             } else {
                 Err(RuntimeError {
-                    message: format!("Function {} didn't return value", func),
+                    message: format!("Function {} didn't return value", identifier),
                 })
             }
         }
-        AST::Symbol { name } => {
-            if let Some(value) = symbols.get(&name) {
+        AST::Symbol { identifier } => {
+            if let Some(value) = symbols.get(&identifier) {
                 let new_value = value.clone();
                 return Ok(new_value);
             } else {
                 Err(RuntimeError {
-                    message: format!("Could not get value from Symbol: {:?}", name),
+                    message: format!("Could not get value from Symbol: {:?}", identifier),
                 })
             }
         }
@@ -127,18 +130,12 @@ fn run_ast(
             *left, *right, operator, symbols,
         )?)),
         AST::Proc {
-            symbol,
-            value,
+            identifier,
+            body,
             args,
         } => {
-            let mut body: Vec<Box<AST>> = vec![];
-
-            for ast in value {
-                body.push(Box::from(*ast));
-            }
-
             symbols.insert(
-                symbol,
+                identifier,
                 PrimitiveValue::Function(FunctionBody {
                     body: body,
                     args: args,
@@ -146,14 +143,14 @@ fn run_ast(
             );
             Ok(None)
         }
-        AST::Call { func, args } => {
-            if !symbols.contains_key(&func) {
+        AST::Call { identifier, args } => {
+            if !symbols.contains_key(&identifier) {
                 return Err(RuntimeError {
-                    message: format!("Symbol {} does not exist.", func),
+                    message: format!("Symbol {} does not exist.", identifier),
                 });
             }
 
-            if let Some(PrimitiveValue::Function(block)) = symbols.get(&func) {
+            if let Some(PrimitiveValue::Function(block)) = symbols.get(&identifier) {
                 // this sets up the function's "scope"
                 let mut f_symbols = symbols.clone();
 
@@ -179,9 +176,9 @@ fn run_ast(
         }
         AST::Return { value } => run_ast(*value, symbols),
         AST::Semicolon => Ok(None),
-        AST::Assign { symbol, value } => {
+        AST::Assign { identifier, value } => {
             if let Some(symbol_value) = run_ast(*value, symbols)? {
-                symbols.insert(symbol, symbol_value);
+                symbols.insert(identifier, symbol_value);
             }
 
             Ok(None)
@@ -194,8 +191,8 @@ fn run_ast(
             }
             Ok(None)
         }
-        AST::Symbol { name } => {
-            if let Some(value) = symbols.get(&name) {
+        AST::Symbol { identifier } => {
+            if let Some(value) = symbols.get(&identifier) {
                 let new_value = value.clone();
                 return Ok(Some(new_value));
             }

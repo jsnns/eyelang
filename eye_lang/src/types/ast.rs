@@ -1,23 +1,24 @@
 use crate::types::binary_operator::BinaryOperator;
 
-type Block = Vec<Box<AST>>;
+pub type Block = Vec<Box<AST>>;
+pub type Identifier = String;
 
 #[derive(Debug, Clone)]
 pub struct FunctionBody {
-    pub body: Vec<Box<AST>>,
+    pub body: Block,
     pub args: Vec<String>,
 }
 
 #[derive(Clone, Debug)]
 pub struct If {
     pub conditional: Box<AST>,
-    pub body: Vec<Box<AST>>,
+    pub body: Block,
 }
 
 #[derive(Clone)]
 pub enum AST {
     Symbol {
-        name: String,
+        identifier: Identifier,
     },
     Number {
         value: i32,
@@ -34,17 +35,17 @@ pub enum AST {
         right: Box<AST>,
     },
     Assign {
-        symbol: String,
+        identifier: Identifier,
         value: Box<AST>,
     },
     Proc {
-        symbol: String,
+        identifier: Identifier,
         args: Vec<String>,
-        value: Vec<Box<AST>>,
+        body: Block,
     },
     Call {
-        func: String,
-        args: Vec<Box<AST>>,
+        identifier: Identifier,
+        args: Block,
     },
     Return {
         value: Box<AST>,
@@ -52,13 +53,13 @@ pub enum AST {
     If {
         this: If,
         elifs: Option<Vec<If>>,
-        el: Option<Vec<Box<AST>>>,
+        el: Option<Block>,
     },
     Print {
         value: Box<AST>,
     },
     Program {
-        program: Vec<Box<AST>>,
+        program: Block,
     },
     EOF,
     Semicolon,
@@ -71,12 +72,12 @@ impl std::string::ToString for AST {
             AST::Number { value } => format!("Number({})", value),
             AST::Str { value } => format!("String({})", value),
             AST::Bool { value } => format!("Bool({})", value),
-            AST::Symbol { name } => format!("Symbol ({})", name),
+            AST::Symbol { identifier } => format!("Symbol ({})", identifier),
             // ctrl characters
             AST::Semicolon => format!(";"),
             AST::EOF => format!("EOF"),
             // actions
-            AST::Assign { symbol, value } => format!("Assign {} = {:?}", symbol, value),
+            AST::Assign { identifier, value } => format!("Assign {} = {:?}", identifier, value),
             AST::Print { value } => format!("Print {:?}", value),
             AST::Binary {
                 operator,
@@ -85,14 +86,14 @@ impl std::string::ToString for AST {
             } => format!("Binary {:?} {} {:?}", left, operator.to_string(), right),
             // blocked calls
             AST::Program { program } => format!("Program: {:?}", program),
-            AST::Call { func, args } => format!("Call {}({:?})", func, args),
+            AST::Call { identifier, args } => format!("Call {}({:?})", identifier, args),
             AST::If { this, elifs, el } => format!("If {:?} {:?} {:?}", this, elifs, el),
             AST::Return { value } => format!("Return <{:?}>", value),
             AST::Proc {
-                symbol,
-                value,
+                identifier,
+                body,
                 args,
-            } => format!("Proc {} {:?}({:?})", symbol, value, args),
+            } => format!("Proc {} {:?}({:?})", identifier, body, args),
         }
     }
 }

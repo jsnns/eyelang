@@ -128,7 +128,7 @@ impl ParseState {
                         return self.maybe_binary(self.parse_call(symbol.to_string()), 0);
                     } else {
                         AST::Symbol {
-                            name: symbol.to_string(),
+                            identifier: symbol.to_string(),
                         }
                     }
                 }
@@ -203,7 +203,7 @@ impl ParseState {
             self.next();
             self.skip(&Token::Operator(BinaryOperator::Assign));
             AST::Assign {
-                symbol: symbol.to_string(),
+                identifier: symbol.to_string(),
                 value: Box::from(self.parse_atom()),
             }
         } else {
@@ -217,7 +217,7 @@ impl ParseState {
     fn parse_call(&self, symbol: String) -> AST {
         self.skip(&Token::LParen);
         AST::Call {
-            func: symbol,
+            identifier: symbol,
             args: self.parse_call_args(),
         }
     }
@@ -258,9 +258,9 @@ impl ParseState {
         if let Token::Symbol(proc_name) = self.next() {
             self.next();
             AST::Proc {
-                symbol: proc_name.to_string(),
+                identifier: proc_name.to_string(),
                 args: self.parse_func_args(),
-                value: self.parse_proc_body(),
+                body: self.parse_proc_body(),
             }
         } else {
             panic!(
