@@ -9,13 +9,13 @@ pub struct FunctionBody {
     pub args: Vec<String>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct If {
     pub conditional: Box<AST>,
     pub body: Block,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum AST {
     Symbol {
         identifier: Identifier,
