@@ -63,7 +63,7 @@ pub enum AST {
     },
     Do {
         count: Box<AST>,
-        identifier: Identifier,
+        identifier: Option<Identifier>,
         body: Block,
     },
     EOF,
@@ -103,7 +103,7 @@ impl std::string::ToString for AST {
                 count,
                 identifier,
                 body,
-            } => format!("Do {:?}:{} {:?}", count, identifier, body),
+            } => format!("Do {:?}:{:?} {:?}", count, identifier, body),
         }
     }
 }

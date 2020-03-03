@@ -1,11 +1,11 @@
 use crate::types::ast::If;
 use crate::types::ast::AST;
 use crate::types::binary_operator::BinaryOperator;
+use crate::types::symbol_store::Identifier;
 use crate::types::token::Token;
 use std::cell::Cell;
 
 pub fn build_program(tokens: Vec<Token>) -> AST {
-    println!("Tokens: {:?}", tokens);
     let mut prog: Vec<Box<AST>> = vec![];
     let parse_state = ParseState {
         tokens: tokens,
@@ -162,18 +162,15 @@ impl ParseState {
 
     fn parse_do(&self) -> AST {
         let count = self.parse_atom();
+        let mut identifier_value: Option<Identifier> = None;
         if let Token::Symbol(identifier) = self.current() {
             self.next();
-            AST::Do {
-                count: Box::from(count),
-                identifier: identifier.clone(),
-                body: self.parse_proc_body(),
-            }
-        } else {
-            panic!(
-                "Do loops must have an index symbol found: {:?}",
-                self.current()
-            );
+            identifier_value = Some(identifier.to_string());
+        }
+        AST::Do {
+            count: Box::from(count),
+            identifier: identifier_value,
+            body: self.parse_proc_body(),
         }
     }
 

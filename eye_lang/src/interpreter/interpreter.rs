@@ -245,7 +245,9 @@ fn run_ast(ast: AST, symbols: &mut SymbolStore) -> Result<Option<PrimitiveValue>
             if let Ok(PrimitiveValue::Num(count)) = value_from_ast(*count, &mut symbols.clone()) {
                 let mut f_symbols = symbols.clone();
                 for i in 0..count {
-                    f_symbols.insert(identifier.clone(), PrimitiveValue::Num(i));
+                    if let Some(identifier_value) = identifier.clone() {
+                        f_symbols.insert(identifier_value.clone(), PrimitiveValue::Num(i));
+                    }
                     // only return if a return value is given
                     if let Some(return_value) = run_body_and_return(body.clone(), &mut f_symbols)? {
                         return Ok(Some(return_value));
