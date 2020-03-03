@@ -103,9 +103,6 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
         else if is_match(&next_data_str, &Regex::new(r"^proc")) {
             data.increment(4);
             tokens.push(Token::Proc);
-        } else if is_match(&next_data_str, &Regex::new(r"^main")) {
-            data.increment(4);
-            tokens.push(Token::Main);
         } else if is_match(&next_data_str, &Regex::new(r"^return")) {
             data.increment(6);
             tokens.push(Token::Return);

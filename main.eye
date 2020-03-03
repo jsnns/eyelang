@@ -11,8 +11,15 @@ proc test() {
     return true;
 }
 
-proc a() {
-    return 10;
+proc m() {
+    proc add(a, b) {
+        return a + b;
+    }
+
+    set i = 5;
+    set j = 1;
+
+    return add(i, j + 2);
 }
 
-print b();
+print 2 - m();

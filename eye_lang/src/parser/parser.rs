@@ -158,11 +158,42 @@ impl ParseState {
     }
 
     fn parse_call(&self, symbol: String) -> AST {
-        self.skip(&Token::RParen);
+        self.skip(&Token::LParen);
         AST::Call {
             func: symbol,
-            args: vec![],
+            args: self.parse_call_args(),
         }
+    }
+
+    fn parse_call_args(&self) -> Vec<Box<AST>> {
+        let mut asts: Vec<Box<AST>> = vec![];
+
+        while !self.is_tok(&Token::RParen) {
+            asts.push(Box::from(self.parse_atom()));
+            self.skip(&Token::Comma);
+        }
+
+        self.skip(&Token::RParen);
+
+        return asts;
+    }
+
+    fn parse_func_args(&self) -> Vec<String> {
+        self.skip(&Token::LParen);
+        let mut tokens = vec![];
+
+        loop {
+            if let Token::Symbol(symbol) = self.current() {
+                self.next();
+                tokens.push(symbol.to_string());
+                self.skip(&Token::Comma);
+            } else {
+                break;
+            }
+        }
+
+        self.skip(&Token::RParen);
+        return tokens;
     }
 
     fn parse_proc(&self) -> AST {
@@ -171,6 +202,7 @@ impl ParseState {
             self.next();
             AST::Proc {
                 symbol: proc_name.to_string(),
+                args: self.parse_func_args(),
                 value: self.parse_proc_body(),
             }
         } else {
@@ -182,10 +214,6 @@ impl ParseState {
     }
 
     fn parse_proc_body(&self) -> Vec<Box<AST>> {
-        // TODO: handle args
-        self.skip(&Token::LParen);
-        self.skip(&Token::RParen);
-
         let mut proc_body: Vec<Box<AST>> = vec![];
 
         if *self.current() == Token::LBrace {

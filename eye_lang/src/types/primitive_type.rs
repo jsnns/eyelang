@@ -1,4 +1,4 @@
-use crate::types::ast::AST;
+use crate::types::body::Block;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -6,7 +6,7 @@ pub enum PrimitiveValue {
     String(String),
     Num(i32),
     Bool(bool),
-    Block(Vec<AST>),
+    Block(Block),
 }
 
 #[derive(Debug, Clone)]
@@ -79,7 +79,7 @@ impl std::string::ToString for PrimitiveValue {
             PrimitiveValue::Bool(val) => val.to_string(),
             PrimitiveValue::String(val) => val.to_string(),
             PrimitiveValue::Num(val) => val.to_string(),
-            PrimitiveValue::Block(body) => format!("{:?}", body),
+            PrimitiveValue::Block(block) => format!("({:?}):{{{:?}}}", block.args, block.body),
         }
     }
 }

@@ -18,6 +18,7 @@ pub enum AST {
     },
     Proc {
         symbol: String,
+        args: Vec<String>,
         value: Vec<Box<AST>>,
     },
     Return {
@@ -57,7 +58,11 @@ impl std::string::ToString for AST {
             AST::Number { value } => format!("{}", value),
             AST::Program { program } => format!("Program: {:?}", program),
             AST::Call { func, args } => format!("Call {}({:?})", func, args),
-            AST::Proc { symbol, value } => format!("Proc {} {:?}", symbol, value),
+            AST::Proc {
+                symbol,
+                value,
+                args,
+            } => format!("Proc {} {:?}({:?})", symbol, value, args),
             AST::Return { value } => format!("Return <{:?}>", value),
             AST::Bool { value } => format!("Bool {}", value),
             AST::Print { value } => format!("Print {:?}", value),

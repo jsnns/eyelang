@@ -1,5 +1,6 @@
 use crate::types::ast::AST;
 use crate::types::binary_operator::BinaryOperator;
+use crate::types::body::Block;
 use crate::types::primitive_type::PrimitiveValue;
 
 use std::collections::HashMap;
@@ -54,31 +55,54 @@ fn run_ast(ast: AST, symbols: &mut HashMap<String, PrimitiveValue>) -> Option<Pr
             left,
             right,
         } => Some(apply_binary_operator(*left, *right, operator, symbols)),
-        AST::Proc { symbol, value } => {
+        AST::Proc {
+            symbol,
+            value,
+            args,
+        } => {
             let mut body: Vec<AST> = vec![];
 
             for ast in value {
                 body.push(*ast);
             }
 
-            symbols.insert(symbol, PrimitiveValue::Block(body));
+            symbols.insert(
+                symbol,
+                PrimitiveValue::Block(Block {
+                    body: body,
+                    args: args,
+                }),
+            );
             None
         }
         AST::Call { func, args } => {
-            //TODO: implement args
-            assert!(args.len() == 0);
-
             if !symbols.contains_key(&func) {
                 panic!("Symbol {} does not exist.", func);
             }
 
-            if let Some(PrimitiveValue::Block(f_body)) = symbols.get(&func) {
-                for ast in f_body {
+            if let Some(PrimitiveValue::Block(block)) = symbols.get(&func) {
+                // this sets up the function's "scope"
+                let mut f_symbols = symbols.clone();
+
+                let args_requested = block.args.clone();
+                let args_given = args;
+
+                assert_eq!(args_given.len(), args_requested.len());
+
+                for i in 0..args_requested.len() {
+                    if let Some(value) = run_ast(*args_given[i].clone(), &mut symbols.clone()) {
+                        f_symbols.insert(args_requested[i].clone(), value);
+                    } else {
+                        panic!("Could not evalue arguemnt {:?}", args_given[i]);
+                    }
+                }
+
+                for ast in block.body.clone() {
                     let new_ast = ast.clone();
                     match ast {
-                        AST::Return { value: _ } => return run_ast(new_ast, &mut symbols.clone()),
+                        AST::Return { value: _ } => return run_ast(new_ast, &mut f_symbols),
                         _ => {
-                            run_ast(new_ast, &mut symbols.clone());
+                            run_ast(new_ast, &mut f_symbols);
                         }
                     }
                 }
@@ -100,6 +124,8 @@ fn run_ast(ast: AST, symbols: &mut HashMap<String, PrimitiveValue>) -> Option<Pr
         AST::Print { value } => {
             if let Some(value) = run_ast(*value, symbols) {
                 println!("{:?}", value);
+            } else {
+                println!("Printed nothing");
             }
             None
         }
@@ -116,7 +142,6 @@ fn run_ast(ast: AST, symbols: &mut HashMap<String, PrimitiveValue>) -> Option<Pr
 }
 
 pub fn interpret(root_program: AST, mut symbols: HashMap<String, PrimitiveValue>) {
-    println!("{:?}", root_program);
     match root_program {
         AST::Program { program } => {
             for ast in program {
