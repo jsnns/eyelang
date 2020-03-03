@@ -7,6 +7,9 @@
     },
     {
       "include": "#strings"
+    },
+    {
+      "include": "#constants"
     }
   ],
   "repository": {
@@ -14,7 +17,19 @@
       "patterns": [
         {
           "name": "keyword.control.eye",
-          "match": "\\b(print|proc|return)\\b"
+          "match": "\\b(print|proc|return|set)\\b"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.numeric.eye",
+          "match": "\\b[-]?\\d+\\b"
+        },
+        {
+          "name": "constant.numeric.eye",
+          "match": "\\b(true|false)\\b"
         }
       ]
     },

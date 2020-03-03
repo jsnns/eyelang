@@ -1,14 +1,23 @@
-use crate::ast::BinaryOperator;
-use crate::ast::AST;
-use crate::token::Token;
+use crate::types::ast::AST;
+use crate::types::binary_operator::BinaryOperator;
+use crate::types::token::Token;
 use std::cell::Cell;
 
-// Implement LL(2) parser
-pub fn get_precedence(operator: &BinaryOperator) -> u8 {
-    match operator {
-        BinaryOperator::Add | BinaryOperator::Subtract => 10,
-        BinaryOperator::Multiply | BinaryOperator::Divide => 20,
+pub fn parse_tokens(tokens: Vec<Token>) -> AST {
+    let mut prog: Vec<Box<AST>> = vec![];
+    let parse_state = ParseState {
+        tokens: tokens,
+        curr_index: Cell::from(0),
+    };
+
+    while parse_state.has_next() {
+        prog.push(Box::from(parse_state.parse_atom()));
+        parse_state.skip(&Token::Semicolon);
     }
+
+    let prog = AST::Program { program: prog };
+
+    return prog;
 }
 
 struct ParseState {
@@ -49,7 +58,8 @@ impl ParseState {
             Token::Operator(BinaryOperator::Add)
             | Token::Operator(BinaryOperator::Subtract)
             | Token::Operator(BinaryOperator::Multiply)
-            | Token::Operator(BinaryOperator::Divide) => true,
+            | Token::Operator(BinaryOperator::Divide)
+            | Token::Operator(BinaryOperator::Assign) => true,
             _ => false,
         }
     }
@@ -57,7 +67,7 @@ impl ParseState {
     fn maybe_binary(&self, left: AST, precedence: u8) -> AST {
         if self.is_op() {
             if let Token::Operator(operator_token) = self.current() {
-                let new_precedence = get_precedence(operator_token);
+                let new_precedence = operator_token.get_precedence();
                 if new_precedence > precedence {
                     self.next();
                     let right = self.maybe_binary(self.parse_atom(), new_precedence);
@@ -107,9 +117,8 @@ impl ParseState {
                         self.next();
                         return self.maybe_binary(self.parse_call(symbol.to_string()), 0);
                     } else {
-                        AST::Assign {
-                            symbol: symbol.to_string(),
-                            value: Box::from(self.parse_atom()),
+                        AST::Symbol {
+                            name: symbol.to_string(),
                         }
                     }
                 }
@@ -119,6 +128,10 @@ impl ParseState {
                         value: Box::from(self.parse_atom()),
                     }
                 }
+                Token::Set => {
+                    self.next();
+                    self.parse_set()
+                }
                 _ => panic!(
                     "parser::parse_atom unimplemented for {}",
                     self.current().to_string()
@@ -126,6 +139,22 @@ impl ParseState {
             },
             0,
         );
+    }
+
+    fn parse_set(&self) -> AST {
+        if let Token::Symbol(symbol) = self.current() {
+            self.next();
+            self.skip(&Token::Operator(BinaryOperator::Assign));
+            AST::Assign {
+                symbol: symbol.to_string(),
+                value: Box::from(self.parse_atom()),
+            }
+        } else {
+            panic!(
+                "Can't determine symbol name for set at {:?}",
+                self.current()
+            );
+        }
     }
 
     fn parse_call(&self, symbol: String) -> AST {
@@ -172,24 +201,4 @@ impl ParseState {
 
         return proc_body;
     }
-}
-
-pub fn parse_tokens(tokens: Vec<Token>) -> AST {
-    // println!("Tokens: {:?} \n", tokens);
-    let mut prog: Vec<Box<AST>> = vec![];
-    let parse_state = ParseState {
-        tokens: tokens,
-        curr_index: Cell::from(0),
-    };
-
-    while parse_state.has_next() {
-        prog.push(Box::from(parse_state.parse_atom()));
-        parse_state.skip(&Token::Semicolon);
-    }
-
-    let prog = AST::Program { program: prog };
-
-    // println!("{:?}", prog);
-
-    return prog;
 }

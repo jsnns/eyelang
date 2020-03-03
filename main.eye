@@ -6,8 +6,13 @@ proc double() {
     return 2 * some_nums();
 }
 
-print double();
-print some_nums();
-print true;
+proc test() {
+    print true;
+    return true;
+}
 
-z();
+proc a() {
+    return 10;
+}
+
+print b();

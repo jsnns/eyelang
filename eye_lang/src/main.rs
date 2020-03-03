@@ -1,16 +1,19 @@
-mod ast;
 mod error;
 mod file;
 mod interpreter;
 mod lexer;
 mod parser;
-mod token;
+mod types;
 
-use ast::PrimitiveValue;
 use std::collections::HashMap;
+use types::primitive_type::PrimitiveValue;
 
 fn main() {
-    let root_dir = "/Users/jacobsansbury/prj/jsnns/eye".to_string();
+    let root_dir = std::env::current_dir()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_string();
     let args: Vec<String> = std::env::args().collect();
     if args.len() <= 1 {
         panic!("No source file give.");
@@ -22,7 +25,6 @@ fn main() {
         let ast = parser::parse_tokens(tokens);
 
         let symbols: HashMap<String, PrimitiveValue> = HashMap::new();
-        // println!("\nStart program === ===");
         interpreter::interpret(ast, symbols);
     }
 }

@@ -1,6 +1,6 @@
-use crate::ast::BinaryOperator;
-use crate::ast::PrimitiveValue;
-use crate::ast::AST;
+use crate::types::ast::AST;
+use crate::types::binary_operator::BinaryOperator;
+use crate::types::primitive_type::PrimitiveValue;
 
 use std::collections::HashMap;
 
@@ -13,6 +13,14 @@ fn value_from_ast(ast: AST, symbols: &mut HashMap<String, PrimitiveValue>) -> Pr
                 return value;
             } else {
                 panic!("Function {} didn't return value", func);
+            }
+        }
+        AST::Symbol { name } => {
+            if let Some(value) = symbols.get(&name) {
+                let new_value = value.clone();
+                return new_value;
+            } else {
+                panic!("Could not get value from Symbol: {:?}", name);
             }
         }
         _ => panic!("Operator value could not be determined {:?}", ast),
@@ -82,10 +90,25 @@ fn run_ast(ast: AST, symbols: &mut HashMap<String, PrimitiveValue>) -> Option<Pr
         AST::Semicolon => None,
         AST::Bool { value } => Some(PrimitiveValue::Bool(value)),
         AST::Number { value } => Some(PrimitiveValue::Num(value)),
+        AST::Assign { symbol, value } => {
+            if let Some(symbol_value) = run_ast(*value, symbols) {
+                symbols.insert(symbol, symbol_value);
+            }
+
+            None
+        }
         AST::Print { value } => {
             if let Some(value) = run_ast(*value, symbols) {
                 println!("{:?}", value);
             }
+            None
+        }
+        AST::Symbol { name } => {
+            if let Some(value) = symbols.get(&name) {
+                let new_value = value.clone();
+                return Some(new_value);
+            }
+
             None
         }
         _ => panic!("AST branch not implemented {:?}", ast),
@@ -93,6 +116,7 @@ fn run_ast(ast: AST, symbols: &mut HashMap<String, PrimitiveValue>) -> Option<Pr
 }
 
 pub fn interpret(root_program: AST, mut symbols: HashMap<String, PrimitiveValue>) {
+    println!("{:?}", root_program);
     match root_program {
         AST::Program { program } => {
             for ast in program {

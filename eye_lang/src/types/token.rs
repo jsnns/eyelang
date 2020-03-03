@@ -1,4 +1,4 @@
-use crate::ast::BinaryOperator;
+use crate::types::binary_operator::BinaryOperator;
 
 #[derive(Clone, PartialEq)]
 pub enum Token {
@@ -17,6 +17,7 @@ pub enum Token {
     Comma,
     Return,
     Print,
+    Set,
 }
 
 impl Token {
@@ -50,6 +51,7 @@ impl std::string::ToString for Token {
             Token::RParen => ")",
             Token::Semicolon => ";",
             Token::Print => "Print",
+            Token::Set => "Set",
         };
 
         str.to_string()

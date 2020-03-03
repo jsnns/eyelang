@@ -1,9 +1,9 @@
 extern crate regex;
 use regex::Regex;
 
-use crate::ast::BinaryOperator;
 use crate::error::TokenError;
-use crate::token::Token;
+use crate::types::binary_operator::BinaryOperator;
+use crate::types::token::Token;
 
 struct Position {
     index: u64,
@@ -89,6 +89,7 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
             '(' => Some(Token::LParen),
             ')' => Some(Token::RParen),
             ',' => Some(Token::Comma),
+            '=' => Some(Token::Operator(BinaryOperator::Assign)),
             _ => None,
         } {
             data.increment(1);
@@ -117,6 +118,9 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
         } else if is_match(&next_data_str, &Regex::new(r"^print")) {
             data.increment(5);
             tokens.push(Token::Print);
+        } else if is_match(&next_data_str, &Regex::new(r"^set")) {
+            data.increment(3);
+            tokens.push(Token::Set);
         }
         // variable sequences ie numbers, symbols, strings
         else if is_match(&next_data_str, &num_regex_result) {
