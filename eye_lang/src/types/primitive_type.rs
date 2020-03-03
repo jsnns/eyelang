@@ -4,7 +4,7 @@ use crate::types::error::NotImplemented;
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum PrimitiveValue {
-    String(String),
+    Str(String),
     Num(i32),
     Bool(bool),
     Block(Block),
@@ -16,10 +16,8 @@ impl PrimitiveValue {
     pub fn add(self: Self, other: Self) -> OperatorValue<Self> {
         let err_val = NotImplemented::from(&self, &other);
         match self {
-            PrimitiveValue::String(a) => match other {
-                PrimitiveValue::String(b) => {
-                    Ok(PrimitiveValue::String(a.to_string() + &b.to_string()))
-                }
+            PrimitiveValue::Str(a) => match other {
+                PrimitiveValue::Str(b) => Ok(PrimitiveValue::Str(format!("{}{}", a, b))),
                 _ => Err(err_val),
             },
             PrimitiveValue::Num(a) => match other {
@@ -63,6 +61,10 @@ impl PrimitiveValue {
                 PrimitiveValue::Bool(b) => Ok(PrimitiveValue::Bool(a == b)),
                 _ => Err(err_val),
             },
+            PrimitiveValue::Str(a) => match other {
+                PrimitiveValue::Str(b) => Ok(PrimitiveValue::Bool(a == b)),
+                _ => Err(err_val),
+            },
             _ => Err(err_val),
         }
     }
@@ -72,7 +74,7 @@ impl std::string::ToString for PrimitiveValue {
     fn to_string(&self) -> String {
         match self {
             PrimitiveValue::Bool(val) => val.to_string(),
-            PrimitiveValue::String(val) => val.to_string(),
+            PrimitiveValue::Str(val) => val.to_string(),
             PrimitiveValue::Num(val) => val.to_string(),
             PrimitiveValue::Block(block) => format!("({:?}):{{{:?}}}", block.args, block.body),
         }

@@ -7,8 +7,3 @@ proc fib(n) {
 
     return fib(n-1) + fib(n-2);
 }
-
-print true;
-print z();
-
-print fib(2);

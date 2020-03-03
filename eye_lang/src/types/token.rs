@@ -4,6 +4,7 @@ use crate::types::binary_operator::BinaryOperator;
 pub enum Token {
     Symbol(String),
     Type(String),
+    Str(String),
     Number(i32),
     Bool(bool),
     Operator(BinaryOperator),
@@ -29,6 +30,7 @@ impl Token {
             Token::Number(value) => (self, value.to_string()),
             Token::Operator(value) => (self, value.to_string()),
             Token::Bool(value) => (self, value.to_string()),
+            Token::Str(value) => (self, value.to_string()),
             _ => (self, "".to_string()),
         }
     }
@@ -41,6 +43,7 @@ impl std::string::ToString for Token {
             Token::Bool(_) => "Bool",
             Token::Number(_) => "Number",
             Token::Type(_) => "Type",
+            Token::Str(_) => "Str",
             Token::Operator(..) => "Operator",
             Token::Proc => "Proc",
             Token::Return => "Return",

@@ -11,15 +11,14 @@ use std::time::Instant;
  * Recursively run an AST program
  */
 pub fn interpret(root_program: AST, mut symbols: HashMap<String, PrimitiveValue>) {
-    match root_program {
-        AST::Program { program } => {
-            let now = Instant::now();
-            match run_body_and_return(program, &mut symbols) {
-                Err(error) => println!("Runtime Error! {}", error.message),
-                Ok(..) => println!("Done in {}ms", now.elapsed().as_millis()),
-            };
-        }
-        _ => panic!("root_program not of type AST::Program, {:?}", root_program),
+    if let AST::Program { program } = root_program {
+        let now = Instant::now();
+        match run_body_and_return(program, &mut symbols) {
+            Err(error) => println!("Runtime Error! {}", error.message),
+            Ok(..) => println!("Done in {}ms", now.elapsed().as_millis()),
+        };
+    } else {
+        panic!("root_program not of type AST::Program, {:?}", root_program);
     }
 }
 
@@ -32,6 +31,12 @@ fn value_from_ast(
     match ast {
         AST::Number { value } => Ok(PrimitiveValue::Num(value)),
         AST::Bool { value } => Ok(PrimitiveValue::Bool(value)),
+        AST::Str { value } => Ok(PrimitiveValue::Str(value)),
+        AST::Binary {
+            left,
+            right,
+            operator,
+        } => apply_binary_operator(*left, *right, operator, symbols),
         AST::Call { func, args: _ } => {
             if let Some(value) = run_ast(new_ast, symbols)? {
                 return Ok(value);
@@ -111,6 +116,9 @@ fn run_ast(
     symbols: &mut HashMap<String, PrimitiveValue>,
 ) -> Result<Option<PrimitiveValue>, RuntimeError> {
     match ast {
+        AST::Number { value } => Ok(Some(PrimitiveValue::Num(value))),
+        AST::Bool { value } => Ok(Some(PrimitiveValue::Bool(value))),
+        AST::Str { value } => Ok(Some(PrimitiveValue::Str(value))),
         AST::Binary {
             operator,
             left,
@@ -171,8 +179,6 @@ fn run_ast(
         }
         AST::Return { value } => run_ast(*value, symbols),
         AST::Semicolon => Ok(None),
-        AST::Bool { value } => Ok(Some(PrimitiveValue::Bool(value))),
-        AST::Number { value } => Ok(Some(PrimitiveValue::Num(value))),
         AST::Assign { symbol, value } => {
             if let Some(symbol_value) = run_ast(*value, symbols)? {
                 symbols.insert(symbol, symbol_value);
@@ -229,7 +235,9 @@ fn run_ast(
             }
             Ok(None)
         }
-        // Panic since this isn't a runtime error
-        _ => panic!("AST branch not implemented {:?}", ast),
+        AST::EOF => Ok(None),
+        AST::Program { program: _ } => Err(RuntimeError {
+            message: format!("Found program in AST."),
+        }),
     }
 }

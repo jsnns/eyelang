@@ -6,7 +6,6 @@ pub struct If {
     pub body: Vec<Box<AST>>,
 }
 
-#[allow(dead_code)]
 #[derive(Clone)]
 pub enum AST {
     Binary {
@@ -33,7 +32,7 @@ pub enum AST {
     Number {
         value: i32,
     },
-    String {
+    Str {
         value: String,
     },
     Bool {
@@ -64,8 +63,10 @@ impl std::string::ToString for AST {
                 operator,
                 left,
                 right,
-            } => format!("{:?} {} {:?}", left, operator.to_string(), right),
-            AST::Number { value } => format!("{}", value),
+            } => format!("Binary {:?} {} {:?}", left, operator.to_string(), right),
+            AST::Number { value } => format!("Number({})", value),
+            AST::Str { value } => format!("String({})", value),
+            AST::Bool { value } => format!("Bool({})", value),
             AST::Program { program } => format!("Program: {:?}", program),
             AST::Call { func, args } => format!("Call {}({:?})", func, args),
             AST::Proc {
@@ -74,13 +75,12 @@ impl std::string::ToString for AST {
                 args,
             } => format!("Proc {} {:?}({:?})", symbol, value, args),
             AST::Return { value } => format!("Return <{:?}>", value),
-            AST::Bool { value } => format!("Bool {}", value),
             AST::Print { value } => format!("Print {:?}", value),
             AST::Semicolon => format!(";"),
             AST::Assign { symbol, value } => format!("Assign {} = {:?}", symbol, value),
             AST::Symbol { name } => format!("Symbol ({})", name),
             AST::If { this, elifs, el } => format!("If {:?} {:?} {:?}", this, elifs, el),
-            _ => format!("N/A"),
+            AST::EOF => format!("EOF"),
         }
     }
 }

@@ -82,6 +82,8 @@ impl ParseState {
                         precedence,
                     );
                 }
+            } else {
+                panic!("Could not get operator.")
             }
         }
         return left;
@@ -108,6 +110,12 @@ impl ParseState {
                 Token::Bool(val) => {
                     self.next();
                     AST::Bool { value: *val }
+                }
+                Token::Str(value) => {
+                    self.next();
+                    AST::Str {
+                        value: value.to_string(),
+                    }
                 }
                 Token::Semicolon => {
                     self.next();

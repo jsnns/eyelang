@@ -81,6 +81,7 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
     let num_regex_result = Regex::new(r"^[-]?\d+");
     let symbol_regex_result = Regex::new(r"^[A-z][A-z0-9_]*");
     let type_regex_result = Regex::new(r"^: [0-9A-z]+");
+    let string_regex_result = Regex::new(r#"^"([^"]|\\")*""#);
     // TODO: this is gross
     while data.has_chars_left() {
         let next_data_str = data.next();
@@ -162,6 +163,12 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
 
             let value_without_colon = type_value[1..type_value.len()].to_string();
             tokens.push(Token::Type(value_without_colon));
+        } else if is_match(&next_data_str, &string_regex_result) {
+            let type_value = data.re_find(&string_regex_result).unwrap_or("".to_string());
+            data.increment_by_str(type_value.clone());
+
+            let value_without_quotes = type_value[1..type_value.len() - 1].to_string();
+            tokens.push(Token::Str(value_without_quotes));
         } else {
             panic!("Could not find token for {}", next_data_str);
         }
