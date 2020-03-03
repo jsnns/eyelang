@@ -140,7 +140,9 @@ fn run_ast(
         }
         AST::Call { func, args } => {
             if !symbols.contains_key(&func) {
-                panic!("Symbol {} does not exist.", func);
+                return Err(RuntimeError {
+                    message: format!("Symbol {} does not exist.", func),
+                });
             }
 
             if let Some(PrimitiveValue::Block(block)) = symbols.get(&func) {
@@ -156,7 +158,9 @@ fn run_ast(
                     if let Some(value) = run_ast(*args_given[i].clone(), &mut symbols.clone())? {
                         f_symbols.insert(args_requested[i].clone(), value);
                     } else {
-                        panic!("Could not evalue arguemnt {:?}", args_given[i]);
+                        return Err(RuntimeError {
+                            message: format!("Could not evaluate arguemnt {:?}", args_given[i]),
+                        });
                     }
                 }
 
@@ -180,7 +184,7 @@ fn run_ast(
             if let Some(value) = run_ast(*value, symbols)? {
                 println!("{:?}", value);
             } else {
-                println!("Printed nothing");
+                println!("''");
             }
             Ok(None)
         }
@@ -225,6 +229,7 @@ fn run_ast(
             }
             Ok(None)
         }
+        // Panic since this isn't a runtime error
         _ => panic!("AST branch not implemented {:?}", ast),
     }
 }
