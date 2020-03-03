@@ -1,0 +1,87 @@
+# Based on the "trust" template v0.1.2
+# https://github.com/japaric/trust/tree/v0.1.2
+
+dist: eye
+language: rust
+services: docker
+sudo: required
+
+env:
+  global:
+    # TODO Update this to match the name of your project.
+    - CRATE_NAME=eye
+
+matrix:
+  # TODO These are all the build jobs. Adjust as necessary. Comment out what you
+  # don't need
+  include:
+    # Linux
+    # - env: TARGET=aarch64-unknown-linux-gnu
+    # - env: TARGET=arm-unknown-linux-gnueabi
+    # - env: TARGET=armv7-unknown-linux-gnueabihf
+    # - env: TARGET=i686-unknown-linux-gnu
+    # - env: TARGET=i686-unknown-linux-musl
+    # - env: TARGET=mips-unknown-linux-gnu
+    # - env: TARGET=mips64-unknown-linux-gnuabi64
+    # - env: TARGET=mips64el-unknown-linux-gnuabi64
+    # - env: TARGET=mipsel-unknown-linux-gnu
+    # - env: TARGET=powerpc-unknown-linux-gnu
+    # - env: TARGET=powerpc64-unknown-linux-gnu
+    # - env: TARGET=powerpc64le-unknown-linux-gnu
+    # - env: TARGET=s390x-unknown-linux-gnu DISABLE_TESTS=1
+    - env: TARGET=x86_64-unknown-linux-gnu
+    - env: TARGET=x86_64-unknown-linux-musl
+
+    # OSX
+    # - env: TARGET=i686-apple-darwin
+    #   os: osx
+    - env: TARGET=x86_64-apple-darwin
+      os: osx
+
+    # Windows
+    - env: TARGET=x86_64-pc-windows-gnu
+
+before_install:
+  - set -e
+  - rustup self update
+
+install:
+  - sh ci/install.sh
+  - source ~/.cargo/env || true
+
+script:
+  - bash ci/script.sh
+
+after_script: set +e
+
+before_deploy:
+  - sh ci/before_deploy.sh
+
+deploy:
+  api_key:
+    secure: "g52kWlLRH3ooJms8jQqVlLtc6317Y+d6IVpt3r37L1O2SkcIfcQaZdVXKwaRd6z3RTfqMSiWo76JKRqOqzr5admZmKbMUgpdH/8thu3qPb0n+2AVsagyQMZDZMViQT4thn7utvmykzw7Q36vI/bm5BkPxP273W3x9l1w7yG/vftRzRRFKn3EBGFlmNdWEsQrX6NxPrwqvrDg2V5vxFUVAOC26zJbq8PHFspDxh+k7YwBh9GCVY58juQumUDZIp5d4TyrdhpkcF9O/bS0lvhZLtCr/UV7LKVqXHwRVYmHEV7OpUcJ+MfkkNgUu2FopXQiocX4a9JY1DCt/Mo+mFkvyp6immRcgPK3Y7EeLWjaFKX7XPqXQd6SnDqiUvglB8ZyqyuK1meuiw0313vsbfF2Ez93LCtKT6ehQA1n69hGUDLTxV393dRL+bO25OoAuv6OV3rj8Vs1kw4Ab+6uOLDCIY4QZwyrXV23GAyEpiPEL2gy3mRRc/SME/u9kOU1zj3v/OtKgbD57p4u5+5Gxs4TlEX/4yLhUI/0hxwwr4Im1Fy0o10zJTb3ysQPuYaI0Ld760kVEbnopvjExUIMNRqPjeZzWxk0FlNPc18WaQ1oaw4W47N7lCTOn1qUAb0OFgflfR4i+YS1fOs+0fRwFbzqgknUrneV4BJkDpGu9qQI+9g="
+  file_glob: true
+  file: $CRATE_NAME-$TRAVIS_TAG-$TARGET.*
+  on:
+    # TODO Here you can pick which targets will generate binary releases
+    # In this example, there are some targets that are tested using the stable
+    # and nightly channels. This condition makes sure there is only one release
+    # for such targets and that's generated using the stable channel
+    condition: $TRAVIS_RUST_VERSION = stable
+  provider: releases
+  skip_cleanup: true
+
+cache: cargo
+before_cache:
+  # Travis can't cache files that are not readable by "others"
+  - chmod -R a+r $HOME/.cargo
+
+branches:
+  only:
+    # release tags
+    - /^v\d+\.\d+\.\d+.*$/
+    - master
+
+notifications:
+  email:
+    on_success: never
