@@ -80,3 +80,94 @@ impl std::string::ToString for PrimitiveValue {
         }
     }
 }
+
+impl std::ops::Not for PrimitiveValue {
+    type Output = PrimitiveValue;
+    fn not(self) -> PrimitiveValue {
+        if let PrimitiveValue::Bool(val) = self {
+            PrimitiveValue::Bool(!val)
+        } else {
+            PrimitiveValue::Bool(false)
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn can_add() {
+        // numbers
+        let a = PrimitiveValue::Num(5);
+        let b = PrimitiveValue::Num(2);
+        let result = a.add(b).unwrap();
+        if let PrimitiveValue::Num(val) = result {
+            assert_eq!(val, 7);
+        }
+
+        // strings
+        let a = PrimitiveValue::Str("abc".to_string());
+        let b = PrimitiveValue::Str("def".to_string());
+        let result = a.add(b).unwrap();
+        if let PrimitiveValue::Str(val) = result {
+            assert_eq!(val, "abcdef".to_string());
+        }
+    }
+
+    #[test]
+    fn can_not_add() {
+        let a = PrimitiveValue::Bool(true);
+        let b = PrimitiveValue::Bool(false);
+        assert!(a.add(b).is_err());
+    }
+
+    #[test]
+    fn can_multiply() {
+        let a = PrimitiveValue::Num(2);
+        let b = PrimitiveValue::Num(4);
+        let result = a.multiply(b).unwrap();
+        if let PrimitiveValue::Num(val) = result {
+            assert_eq!(val, 8);
+        }
+    }
+
+    #[test]
+    fn can_not_multiply() {
+        let a = PrimitiveValue::Num(2);
+        let b = PrimitiveValue::Bool(true);
+        assert!(a.multiply(b).is_err());
+    }
+
+    #[test]
+    fn is_eq() {
+        let a = PrimitiveValue::Num(2);
+        let b = PrimitiveValue::Num(3);
+        check_false(a.clone().is_equal(b.clone()).unwrap());
+        check(a.clone().is_equal(a.clone()).unwrap());
+
+        let a = PrimitiveValue::Str("a".to_string());
+        let b = PrimitiveValue::Str("b".to_string());
+        check_false(a.is_equal(b).unwrap());
+
+        let a = PrimitiveValue::Bool(true);
+        let b = PrimitiveValue::Bool(false);
+        check_false(a.is_equal(b).unwrap());
+    }
+
+    #[test]
+    fn not() {
+        check(!PrimitiveValue::Bool(false));
+    }
+
+    fn check_false(a: PrimitiveValue) {
+        check(!a);
+    }
+
+    fn check(a: PrimitiveValue) {
+        if let PrimitiveValue::Bool(result) = a {
+            assert!(result);
+        } else {
+            panic!("Was not given a bool val.");
+        }
+    }
+}
