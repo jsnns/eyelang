@@ -1,5 +1,11 @@
 use crate::types::binary_operator::BinaryOperator;
 
+#[derive(Clone, Debug)]
+pub struct If {
+    pub conditional: Box<AST>,
+    pub body: Vec<Box<AST>>,
+}
+
 #[allow(dead_code)]
 #[derive(Clone)]
 pub enum AST {
@@ -33,7 +39,11 @@ pub enum AST {
     Bool {
         value: bool,
     },
-    If,
+    If {
+        this: If,
+        elifs: Option<Vec<If>>,
+        el: Option<Vec<Box<AST>>>,
+    },
     Program {
         program: Vec<Box<AST>>,
     },
@@ -69,6 +79,7 @@ impl std::string::ToString for AST {
             AST::Semicolon => format!(";"),
             AST::Assign { symbol, value } => format!("Assign {} = {:?}", symbol, value),
             AST::Symbol { name } => format!("Symbol ({})", name),
+            AST::If { this, elifs, el } => format!("If {:?} {:?} {:?}", this, elifs, el),
             _ => format!("N/A"),
         }
     }

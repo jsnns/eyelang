@@ -1,8 +1,8 @@
 extern crate regex;
 use regex::Regex;
 
-use crate::error::TokenError;
 use crate::types::binary_operator::BinaryOperator;
+use crate::types::error::TokenError;
 use crate::types::token::Token;
 
 struct Position {
@@ -54,6 +54,13 @@ impl Position {
             Ok("".to_string())
         }
     }
+    fn is_keyword(&self, s: &str) -> bool {
+        if let Ok(regex) = Regex::new(&format!(r"^{}", s.to_string())) {
+            regex.is_match(&self.next().clone().to_string())
+        } else {
+            false
+        }
+    }
 }
 
 fn is_match(next_data_str: &Box<String>, re: &Result<regex::Regex, regex::Error>) -> bool {
@@ -78,7 +85,15 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
     while data.has_chars_left() {
         let next_data_str = data.next();
 
-        if let Some(token) = match data.current_char() {
+        if data.is_keyword("==") {
+            data.increment(2);
+            tokens.push(Token::Operator(BinaryOperator::IsEq))
+        } else if data.is_keyword("!=") {
+            data.increment(2);
+            tokens.push(Token::Operator(BinaryOperator::IsNEq))
+        }
+        // operator
+        else if let Some(token) = match data.current_char() {
             '+' => Some(Token::Operator(BinaryOperator::Add)),
             '-' => Some(Token::Operator(BinaryOperator::Subtract)),
             '*' => Some(Token::Operator(BinaryOperator::Multiply)),
@@ -100,24 +115,30 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
             data.increment(1);
         }
         // match keywords
-        else if is_match(&next_data_str, &Regex::new(r"^proc")) {
+        else if data.is_keyword("proc") {
             data.increment(4);
             tokens.push(Token::Proc);
-        } else if is_match(&next_data_str, &Regex::new(r"^return")) {
+        } else if data.is_keyword("return") {
             data.increment(6);
             tokens.push(Token::Return);
-        } else if is_match(&next_data_str, &Regex::new(r"^true")) {
+        } else if data.is_keyword("true") {
             data.increment(4);
             tokens.push(Token::Bool(true));
-        } else if is_match(&next_data_str, &Regex::new(r"^false")) {
+        } else if data.is_keyword("false") {
             data.increment(5);
             tokens.push(Token::Bool(false));
-        } else if is_match(&next_data_str, &Regex::new(r"^print")) {
+        } else if data.is_keyword("print") {
             data.increment(5);
             tokens.push(Token::Print);
-        } else if is_match(&next_data_str, &Regex::new(r"^set")) {
+        } else if data.is_keyword("set") {
             data.increment(3);
             tokens.push(Token::Set);
+        } else if data.is_keyword("if") {
+            data.increment(2);
+            tokens.push(Token::If);
+        } else if data.is_keyword("else") {
+            data.increment(4);
+            tokens.push(Token::Else);
         }
         // variable sequences ie numbers, symbols, strings
         else if is_match(&next_data_str, &num_regex_result) {

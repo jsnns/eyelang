@@ -17,6 +17,8 @@ pub enum Token {
     Return,
     Print,
     Set,
+    If,
+    Else,
 }
 
 impl Token {
@@ -50,6 +52,8 @@ impl std::string::ToString for Token {
             Token::Semicolon => ";",
             Token::Print => "Print",
             Token::Set => "Set",
+            Token::If => "If",
+            Token::Else => "Else",
         };
 
         str.to_string()

@@ -1,4 +1,3 @@
-mod error;
 mod file;
 mod interpreter;
 mod lexer;

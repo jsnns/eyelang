@@ -1,3 +1,4 @@
+use crate::types::ast::If;
 use crate::types::ast::AST;
 use crate::types::binary_operator::BinaryOperator;
 use crate::types::token::Token;
@@ -59,7 +60,8 @@ impl ParseState {
             | Token::Operator(BinaryOperator::Subtract)
             | Token::Operator(BinaryOperator::Multiply)
             | Token::Operator(BinaryOperator::Divide)
-            | Token::Operator(BinaryOperator::Assign) => true,
+            | Token::Operator(BinaryOperator::Assign)
+            | Token::Operator(BinaryOperator::IsEq) => true,
             _ => false,
         }
     }
@@ -132,6 +134,10 @@ impl ParseState {
                     self.next();
                     self.parse_set()
                 }
+                Token::If => {
+                    self.next();
+                    self.parse_if()
+                }
                 _ => panic!(
                     "parser::parse_atom unimplemented for {}",
                     self.current().to_string()
@@ -139,6 +145,49 @@ impl ParseState {
             },
             0,
         );
+    }
+
+    fn parse_if(&self) -> AST {
+        AST::If {
+            this: If {
+                conditional: Box::from(self.parse_atom()),
+                body: self.parse_proc_body(),
+            },
+            elifs: self.parse_elif(),
+            el: self.parse_el(),
+        }
+    }
+
+    fn parse_elif(&self) -> Option<Vec<If>> {
+        let mut elifs: Vec<If> = vec![];
+        if self.is_tok(&Token::Else) {
+            while self.is_tok(&Token::Else) {
+                self.skip(&Token::Else);
+                // else after if-else
+                if self.is_tok(&Token::LBrace) {
+                    return Some(elifs);
+                }
+                assert_eq!(*self.current(), Token::If);
+                self.next();
+                elifs.push(If {
+                    conditional: Box::from(self.parse_atom()),
+                    body: self.parse_proc_body(),
+                })
+            }
+        } else {
+            return None;
+        }
+
+        Some(elifs)
+    }
+
+    fn parse_el(&self) -> Option<Vec<Box<AST>>> {
+        if self.is_tok(&Token::Else) {
+            self.skip(&Token::Else);
+            Some(self.parse_proc_body())
+        } else {
+            None
+        }
     }
 
     fn parse_set(&self) -> AST {

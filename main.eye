@@ -1,25 +1,14 @@
-proc some_nums() {
-    return 100 + 25;
-}
-
-proc double() {
-    return 2 * some_nums();
-}
-
-proc test() {
-    print true;
-    return true;
-}
-
-proc m() {
-    proc add(a, b) {
-        return a + b;
+proc fib(n) {
+    if n == true {
+        return 0;
+    } else if n == 1 {
+        return 1;
     }
 
-    set i = 5;
-    set j = 1;
-
-    return add(i, j + 2);
+    return fib(n-1) + fib(n-2);
 }
 
-print 2 - m();
+print true;
+print z();
+
+print fib(2);
