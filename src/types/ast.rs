@@ -66,6 +66,9 @@ pub enum AST {
         identifier: Option<Identifier>,
         body: Block,
     },
+    Throw {
+        message: String,
+    },
     EOF,
     Semicolon,
 }
@@ -104,6 +107,7 @@ impl std::string::ToString for AST {
                 identifier,
                 body,
             } => format!("Do {:?}:{:?} {:?}", count, identifier, body),
+            AST::Throw { message } => format!("Throw {}", message),
         }
     }
 }

@@ -9,7 +9,7 @@ use crate::types::symbol_store::SymbolStore;
 use std::time::Instant;
 
 /**
- * Recursively run an AST program
+ * Run AST program and handle errors
  */
 pub fn interpret(root_program: AST, mut symbols: SymbolStore, options: &Options) {
     if let AST::Program { program } = root_program {
@@ -274,6 +274,9 @@ fn run_ast(
             }
             return Ok(None);
         }
+        AST::Throw { message } => Err(RuntimeError {
+            message: format!("{}", message),
+        }),
         AST::EOF => Ok(None),
         AST::Program { program: _ } => Err(RuntimeError {
             message: format!("Found program in AST."),

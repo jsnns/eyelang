@@ -21,6 +21,7 @@ pub enum Token {
     If,
     Else,
     Do,
+    Throw,
 }
 
 impl Token {
@@ -59,6 +60,7 @@ impl std::string::ToString for Token {
             Token::If => "If",
             Token::Else => "Else",
             Token::Do => "Do",
+            Token::Throw => "Throw",
         };
 
         str.to_string()

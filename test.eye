@@ -1,3 +1,6 @@
-print 10 == 20;
-print 10;
-print "hi";
+do 10 a {
+    print a;
+    if a == 5 {
+        throw "Fives suck";
+    }
+}

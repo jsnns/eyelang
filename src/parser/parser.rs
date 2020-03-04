@@ -151,6 +151,17 @@ impl ParseState {
                     self.next();
                     self.parse_do()
                 }
+                Token::Throw => {
+                    self.next();
+                    if let Token::Str(message) = self.current() {
+                        self.next();
+                        AST::Throw {
+                            message: message.to_string(),
+                        }
+                    } else {
+                        panic!("Can't find message to throw!");
+                    }
+                }
                 _ => panic!(
                     "parser::parse_atom unimplemented for {}",
                     self.current().to_string()
