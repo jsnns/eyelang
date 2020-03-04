@@ -23,7 +23,7 @@ pub fn interpret(root_program: AST, mut symbols: SymbolStore) {
 }
 
 // Get a primitive value from an AST
-fn value_from_ast(ast: AST, symbols: &mut SymbolStore) -> Result<PrimitiveValue, RuntimeError> {
+pub fn value_from_ast(ast: AST, symbols: &mut SymbolStore) -> Result<PrimitiveValue, RuntimeError> {
     let new_ast = ast.clone();
     match ast {
         AST::Number { value } => Ok(PrimitiveValue::Num(value)),
@@ -85,7 +85,7 @@ fn apply_binary_operator(
 /**
  * Run given set of ASTs and return any value returned by the ASTs
  */
-fn run_body_and_return(
+pub fn run_body_and_return(
     body: Vec<Box<AST>>,
     symbols: &mut SymbolStore,
 ) -> Result<Option<PrimitiveValue>, RuntimeError> {
