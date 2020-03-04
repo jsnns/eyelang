@@ -7,6 +7,7 @@ pub struct Options {
 }
 
 impl Options {
+    #[allow(dead_code)]
     pub fn debug() -> Options {
         Options {
             print_fn: debug_print,
@@ -27,5 +28,5 @@ fn debug_print(a: PrimitiveValue) {
 }
 
 fn default_print(a: PrimitiveValue) {
-    println!("{:?}", a);
+    println!("{}", a.to_string());
 }
