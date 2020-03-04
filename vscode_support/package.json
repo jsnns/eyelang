@@ -3,11 +3,12 @@
   "displayName": "eyelang",
   "description": "Eyelang support",
   "publisher": "workbyjacob",
+  "icon": "assets/img/EyelangLogo.png",
   "repository": {
     "type": "github",
     "url": "https://github.com/jsnns/eyelang"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.42.0"
   },
