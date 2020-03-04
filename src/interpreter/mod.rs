@@ -6,6 +6,7 @@ mod test {
     use super::*;
     use crate::types::ast::AST;
     use crate::types::binary_operator::BinaryOperator;
+    use crate::types::options::Options;
     use crate::types::primitive_value::PrimitiveValue;
     use std::collections::HashMap;
 
@@ -25,7 +26,7 @@ mod test {
         })];
 
         let mut symbols = HashMap::new();
-        let result = interpreter::run_body_and_return(program, &mut symbols)
+        let result = interpreter::run_body_and_return(program, &mut symbols, &Options::debug())
             .unwrap()
             .unwrap();
 

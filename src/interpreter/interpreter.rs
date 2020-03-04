@@ -2,6 +2,7 @@ use crate::types::ast::FunctionBody;
 use crate::types::ast::AST;
 use crate::types::binary_operator::BinaryOperator;
 use crate::types::error::RuntimeError;
+use crate::types::options::Options;
 use crate::types::primitive_value::PrimitiveValue;
 use crate::types::symbol_store::SymbolStore;
 
@@ -10,10 +11,10 @@ use std::time::Instant;
 /**
  * Recursively run an AST program
  */
-pub fn interpret(root_program: AST, mut symbols: SymbolStore) {
+pub fn interpret(root_program: AST, mut symbols: SymbolStore, options: &Options) {
     if let AST::Program { program } = root_program {
         let now = Instant::now();
-        match run_body_and_return(program, &mut symbols) {
+        match run_body_and_return(program, &mut symbols, options) {
             Err(error) => println!("Runtime Error! {}", error.message),
             Ok(..) => println!("Done in {}ms", now.elapsed().as_millis()),
         };
@@ -23,7 +24,11 @@ pub fn interpret(root_program: AST, mut symbols: SymbolStore) {
 }
 
 // Get a primitive value from an AST
-pub fn value_from_ast(ast: AST, symbols: &mut SymbolStore) -> Result<PrimitiveValue, RuntimeError> {
+pub fn value_from_ast(
+    ast: AST,
+    symbols: &mut SymbolStore,
+    options: &Options,
+) -> Result<PrimitiveValue, RuntimeError> {
     let new_ast = ast.clone();
     match ast {
         AST::Number { value } => Ok(PrimitiveValue::Num(value)),
@@ -33,12 +38,12 @@ pub fn value_from_ast(ast: AST, symbols: &mut SymbolStore) -> Result<PrimitiveVa
             left,
             right,
             operator,
-        } => apply_binary_operator(*left, *right, operator, symbols),
+        } => apply_binary_operator(*left, *right, operator, symbols, options),
         AST::Call {
             identifier,
             args: _,
         } => {
-            if let Some(value) = run_ast(new_ast, symbols)? {
+            if let Some(value) = run_ast(new_ast, symbols, options)? {
                 return Ok(value);
             } else {
                 Err(RuntimeError {
@@ -70,9 +75,10 @@ fn apply_binary_operator(
     right: AST,
     operator: BinaryOperator,
     symbols: &mut SymbolStore,
+    options: &Options,
 ) -> Result<PrimitiveValue, RuntimeError> {
-    let left_value = value_from_ast(left, symbols)?;
-    let right_value = value_from_ast(right, symbols)?;
+    let left_value = value_from_ast(left, symbols, options)?;
+    let right_value = value_from_ast(right, symbols, options)?;
     match operator {
         BinaryOperator::Add => Ok(left_value.add(right_value)?),
         BinaryOperator::Subtract => Ok(left_value.subtract(right_value)?),
@@ -88,17 +94,18 @@ fn apply_binary_operator(
 pub fn run_body_and_return(
     body: Vec<Box<AST>>,
     symbols: &mut SymbolStore,
+    options: &Options,
 ) -> Result<Option<PrimitiveValue>, RuntimeError> {
     for ast in body {
         let new_ast = *ast.clone();
         match *ast {
-            AST::Return { value: _ } => return run_ast(new_ast, symbols),
+            AST::Return { value: _ } => return run_ast(new_ast, symbols, options),
             AST::Do {
                 count: _,
                 body: _,
                 identifier: _,
             } => {
-                if let Some(val) = run_ast(new_ast, symbols)? {
+                if let Some(val) = run_ast(new_ast, symbols, options)? {
                     return Ok(Some(val));
                 }
             }
@@ -107,12 +114,12 @@ pub fn run_body_and_return(
                 elifs: _,
                 el: _,
             } => {
-                if let Some(val) = run_ast(new_ast, symbols)? {
+                if let Some(val) = run_ast(new_ast, symbols, options)? {
                     return Ok(Some(val));
                 }
             }
             _ => {
-                run_ast(new_ast, symbols)?;
+                run_ast(new_ast, symbols, options)?;
             }
         }
     }
@@ -120,7 +127,11 @@ pub fn run_body_and_return(
     Ok(None)
 }
 
-fn run_ast(ast: AST, symbols: &mut SymbolStore) -> Result<Option<PrimitiveValue>, RuntimeError> {
+fn run_ast(
+    ast: AST,
+    symbols: &mut SymbolStore,
+    options: &Options,
+) -> Result<Option<PrimitiveValue>, RuntimeError> {
     match ast {
         AST::Number { value } => Ok(Some(PrimitiveValue::Num(value))),
         AST::Bool { value } => Ok(Some(PrimitiveValue::Bool(value))),
@@ -130,7 +141,7 @@ fn run_ast(ast: AST, symbols: &mut SymbolStore) -> Result<Option<PrimitiveValue>
             left,
             right,
         } => Ok(Some(apply_binary_operator(
-            *left, *right, operator, symbols,
+            *left, *right, operator, symbols, options,
         )?)),
         AST::Proc {
             identifier,
@@ -163,7 +174,9 @@ fn run_ast(ast: AST, symbols: &mut SymbolStore) -> Result<Option<PrimitiveValue>
                 assert_eq!(args_given.len(), args_requested.len());
 
                 for i in 0..args_requested.len() {
-                    if let Some(value) = run_ast(*args_given[i].clone(), &mut symbols.clone())? {
+                    if let Some(value) =
+                        run_ast(*args_given[i].clone(), &mut symbols.clone(), options)?
+                    {
                         f_symbols.insert(args_requested[i].clone(), value);
                     } else {
                         return Err(RuntimeError {
@@ -172,23 +185,23 @@ fn run_ast(ast: AST, symbols: &mut SymbolStore) -> Result<Option<PrimitiveValue>
                     }
                 }
 
-                return run_body_and_return(block.body.clone(), &mut f_symbols);
+                return run_body_and_return(block.body.clone(), &mut f_symbols, options);
             }
 
             Ok(None)
         }
-        AST::Return { value } => run_ast(*value, symbols),
+        AST::Return { value } => run_ast(*value, symbols, options),
         AST::Semicolon => Ok(None),
         AST::Assign { identifier, value } => {
-            if let Some(symbol_value) = run_ast(*value, symbols)? {
+            if let Some(symbol_value) = run_ast(*value, symbols, options)? {
                 symbols.insert(identifier, symbol_value);
             }
 
             Ok(None)
         }
         AST::Print { value } => {
-            if let Some(value) = run_ast(*value, symbols)? {
-                println!("{:?}", value);
+            if let Some(value) = run_ast(*value, symbols, options)? {
+                (options.print_fn)(value);
             } else {
                 println!("''");
             }
@@ -206,23 +219,24 @@ fn run_ast(ast: AST, symbols: &mut SymbolStore) -> Result<Option<PrimitiveValue>
         }
         AST::If { this, elifs, el } => {
             if let Some(PrimitiveValue::Bool(val)) =
-                run_ast(*this.conditional, &mut symbols.clone())?
+                run_ast(*this.conditional, &mut symbols.clone(), options)?
             {
                 if val {
                     // run if statement body and return if needed
-                    return run_body_and_return(this.body, &mut symbols.clone());
+                    return run_body_and_return(this.body, &mut symbols.clone(), options);
                 }
 
                 // go through each elif
                 if let Some(elifs) = elifs {
                     for elif in elifs {
                         if let Some(PrimitiveValue::Bool(elif_val)) =
-                            run_ast(*elif.conditional, &mut symbols.clone())?
+                            run_ast(*elif.conditional, &mut symbols.clone(), options)?
                         {
                             if elif_val {
                                 return run_body_and_return(
                                     elif.body.clone(),
                                     &mut symbols.clone(),
+                                    options,
                                 );
                             }
                         }
@@ -232,7 +246,7 @@ fn run_ast(ast: AST, symbols: &mut SymbolStore) -> Result<Option<PrimitiveValue>
                 // if we fall through to here
                 // we haven't found anything
                 if let Some(el) = el {
-                    return run_body_and_return(el.clone(), &mut symbols.clone());
+                    return run_body_and_return(el.clone(), &mut symbols.clone(), options);
                 }
             }
             Ok(None)
@@ -242,14 +256,18 @@ fn run_ast(ast: AST, symbols: &mut SymbolStore) -> Result<Option<PrimitiveValue>
             body,
             identifier,
         } => {
-            if let Ok(PrimitiveValue::Num(count)) = value_from_ast(*count, &mut symbols.clone()) {
+            if let Ok(PrimitiveValue::Num(count)) =
+                value_from_ast(*count, &mut symbols.clone(), options)
+            {
                 let mut f_symbols = symbols.clone();
                 for i in 0..count {
                     if let Some(identifier_value) = identifier.clone() {
                         f_symbols.insert(identifier_value.clone(), PrimitiveValue::Num(i));
                     }
                     // only return if a return value is given
-                    if let Some(return_value) = run_body_and_return(body.clone(), &mut f_symbols)? {
+                    if let Some(return_value) =
+                        run_body_and_return(body.clone(), &mut f_symbols, options)?
+                    {
                         return Ok(Some(return_value));
                     }
                 }

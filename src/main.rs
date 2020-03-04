@@ -5,6 +5,7 @@ mod parser;
 mod types;
 
 use std::collections::HashMap;
+use types::options::Options;
 use types::symbol_store::SymbolStore;
 
 fn main() {
@@ -20,7 +21,7 @@ fn main() {
         if let Ok(tokens) = lexer::tokenize(source_text) {
             let ast = parser::build_program(tokens);
             let symbols: SymbolStore = HashMap::new();
-            interpreter::interpret(ast, symbols);
+            interpreter::interpret(ast, symbols, &Options::default());
         }
     } else {
         println!("First argument must be a source file.")
