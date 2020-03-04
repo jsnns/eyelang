@@ -104,6 +104,15 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
             data.increment(2);
             tokens.push(Token::Operator(BinaryOperator::IsNEq))
         }
+        // number before operators to get neg nums
+        else if is_match(&next_data_str, &num_regex_result) {
+            let num = data
+                .re_find(&num_regex_result)
+                .unwrap_or("".to_string())
+                .to_string();
+            data.increment_by_str(num.clone());
+            tokens.push(Token::Number(num.parse().unwrap()));
+        }
         // single char operators
         else if let Some(token) = match data.current_char() {
             '+' => Some(Token::Operator(BinaryOperator::Add)),
@@ -159,14 +168,7 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
             tokens.push(Token::Else);
         }
         // variable sequences ie numbers, symbols, strings
-        else if is_match(&next_data_str, &num_regex_result) {
-            let num = data
-                .re_find(&num_regex_result)
-                .unwrap_or("".to_string())
-                .to_string();
-            data.increment_by_str(num.clone());
-            tokens.push(Token::Number(num.parse().unwrap()));
-        } else if is_match(&next_data_str, &symbol_regex_result) {
+        else if is_match(&next_data_str, &symbol_regex_result) {
             if let Ok(symbol_name) = data.re_find(&symbol_regex_result) {
                 data.increment_by_str(symbol_name.clone());
                 tokens.push(Token::Symbol(symbol_name));

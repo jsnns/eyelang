@@ -7,6 +7,12 @@ mod tokens {
     use crate::types::binary_operator::BinaryOperator;
     use crate::types::token::Token;
     #[test]
+    fn neg_numbers() {
+        let program = "-1;".to_string();
+        let tokens = lexer::tokenize(program).unwrap();
+        assert_eq!(tokens, vec![Token::Number(-1), Token::Semicolon])
+    }
+    #[test]
     fn add_numbers() {
         let program = "10 + 20 * 1;".to_string();
         let tokens = lexer::tokenize(program).unwrap();
