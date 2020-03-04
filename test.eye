@@ -1,6 +1,4 @@
-do 10 a {
-    print a;
-    if a == 5 {
-        throw "Fives suck";
-    }
+set a = -1;
+if a == -1 {
+    throw "a must be positive";
 }

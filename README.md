@@ -7,6 +7,11 @@ To run `main.eye`
 
 > `./eye main`
 
+## VS Code Extension
+
+Install the VSCode extension [here](https://marketplace.visualstudio.com/items?itemName=workbyjacob.eyelang)!
+
+
 # Syntax
 
 - [Types](https://github.com/jsnns/eyelang/blob/master/examples/types.eye)

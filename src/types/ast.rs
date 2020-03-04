@@ -87,6 +87,7 @@ impl std::string::ToString for AST {
             // actions
             AST::Assign { identifier, value } => format!("Assign {} = {:?}", identifier, value),
             AST::Print { value } => format!("Print {:?}", value),
+            AST::Throw { message } => format!("Throw {}", message),
             AST::Binary {
                 operator,
                 left,
@@ -107,7 +108,6 @@ impl std::string::ToString for AST {
                 identifier,
                 body,
             } => format!("Do {:?}:{:?} {:?}", count, identifier, body),
-            AST::Throw { message } => format!("Throw {}", message),
         }
     }
 }

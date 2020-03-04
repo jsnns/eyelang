@@ -1,25 +1,39 @@
 {
-    "name": "eyelang",
-    "displayName": "eyelang",
-    "description": "Eyelang support",
-    "version": "0.0.1",
-    "engines": {
-        "vscode": "^1.42.0"
-    },
-    "categories": [
-        "Programming Languages"
+  "name": "eyelang",
+  "displayName": "eyelang",
+  "description": "Eyelang support",
+  "publisher": "workbyjacob",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/jsnns/eyelang"
+  },
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.42.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "eye",
+        "aliases": [
+          "Eye",
+          "eye"
+        ],
+        "extensions": [
+          ".eye"
+        ],
+        "configuration": "./language-configuration.json"
+      }
     ],
-    "contributes": {
-        "languages": [{
-            "id": "eye",
-            "aliases": ["Eye", "eye"],
-            "extensions": [".eye"],
-            "configuration": "./language-configuration.json"
-        }],
-        "grammars": [{
-            "language": "eye",
-            "scopeName": "source.eye",
-            "path": "./syntaxes/eye.tmLanguage.json"
-        }]
-    }
+    "grammars": [
+      {
+        "language": "eye",
+        "scopeName": "source.eye",
+        "path": "./syntaxes/eye.tmLanguage.json"
+      }
+    ]
+  }
 }
