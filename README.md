@@ -1,3 +1,4 @@
+![Logo](https://raw.githubusercontent.com/jsnns/eyelang/master/vscode_support/assets/img/EyelangLogoSmall.png)
 # Getting Started
 
 1. [Download](https://github.com/jsnns/eyelang/releases) the latest release of the eyelang runtime for your OS/Arch
