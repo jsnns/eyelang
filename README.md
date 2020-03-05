@@ -6,7 +6,7 @@
 
 To run `main.eye`
 
-> `./eye main`
+> `./eye main.eye`
 
 ## VS Code Extension
 
