@@ -282,7 +282,11 @@ impl ParseState {
     }
 
     fn parse_el(&self) -> Option<Vec<Box<AST>>> {
-        Some(self.parse_proc_body())
+        if self.is_tok(&Token::LBrace) {
+            Some(self.parse_proc_body())
+        } else {
+            None
+        }
     }
 
     fn parse_set(&self, symbol: &String) -> AST {
@@ -353,7 +357,12 @@ impl ParseState {
             // skip past '}'
             self.skip(&Token::RBrace);
         } else {
-            panic!("Expecting {{ found {:?}", self.current());
+            panic!(
+                "Expecting {{ found {:?} {:?} {:?}",
+                self.current(),
+                self.next(),
+                self.next()
+            );
         }
 
         return proc_body;

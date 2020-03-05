@@ -1,12 +1,12 @@
-set a = true;
-set b = false;
+define a to be true;
+define b to be false;
 
-proc main() {
-    if a == true {
+define main to be {
+    if a is true {
         print "A is true";
-    } else if b == true {
+    } else if b is true {
         print "B is true";
     }
-}
+};
 
-main();
+run main;
