@@ -136,6 +136,9 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
         } else if data.is_keyword("do") {
             data.increment(2);
             tokens.push(Token::Do);
+        } else if data.is_keyword("times") {
+            data.increment(5);
+            tokens.push(Token::Times);
         } else if data.is_keyword("run") {
             data.increment(3);
             tokens.push(Token::Run);

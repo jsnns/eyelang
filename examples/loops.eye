@@ -1,4 +1,4 @@
 // print 0-24
-do 25 index {
+do {
     print index;
-}
+} 25 times given index;

@@ -234,8 +234,14 @@ impl ParseState {
     }
 
     fn parse_do(&self) -> AST {
+        let body = self.parse_proc_body();
         let count = self.parse_atom();
+        assert_eq!(self.current(), &Token::Times);
+        self.skip(&Token::Times);
         let mut identifier_value: Option<Identifier> = None;
+
+        // skip given tag
+        self.skip(&Token::Given);
         if let Token::Symbol(identifier) = self.current() {
             self.next();
             identifier_value = Some(identifier.to_string());
@@ -243,7 +249,7 @@ impl ParseState {
         AST::Do {
             count: Box::from(count),
             identifier: identifier_value,
-            body: self.parse_proc_body(),
+            body: body,
         }
     }
 

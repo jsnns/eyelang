@@ -18,6 +18,7 @@ pub enum Token {
     If,
     Else,
     Do,
+    Times,
     Throw,
     Given,
     Define,
@@ -65,6 +66,7 @@ impl std::string::ToString for Token {
             Token::Define => "Define",
             Token::ToBe => "ToBe",
             Token::Run => "Run",
+            Token::Times => "Times",
         };
 
         str.to_string()
