@@ -1,12 +1,12 @@
-proc fib(n) {
-    if n == 0 {
+define fib to be {
+    if n is 0 {
         return 0;
-    } else if n == 1 {
+    } else if n is 1 {
         return 1;
+    } else {
+        return fib(n-1) + fib(n-2);
     }
+} given (n);
 
-    return fib(n-1) + fib(n-2);
-}
-
-// prints Num(55) to stdout
-print fib(10);
+// prints '55' to stdout
+print run fib given (10);

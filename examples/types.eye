@@ -4,9 +4,9 @@
 // number
 
 // bool
-set bool = true;
-set string = "Hello World!";
-set number = 123;
+define bool to be true;
+define string to be "Hello World!";
+define number to be 123;
 
 print bool;
 print string;

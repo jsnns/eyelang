@@ -1,7 +1,8 @@
-// functions are declared with 'proc'
+// functions are declared with 'define'
 
-proc add(a, b) {
+define add to be {
     return a + b;
-}
+} given (a, b);
 
-print add(5, 2);
+// prints '7' to stdout
+print run add given (5, 2);
