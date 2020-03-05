@@ -1,8 +1,10 @@
 use crate::types::primitive_value::PrimitiveValue;
 
+pub type PrintFn = fn(a: PrimitiveValue);
+
 #[derive(Clone)]
 pub struct Options {
-    pub print_fn: fn(a: PrimitiveValue),
+    pub print_fn: PrintFn,
     pub debug: bool,
 }
 

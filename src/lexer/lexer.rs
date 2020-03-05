@@ -97,21 +97,12 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
             );
         }
         // multi-char operators
-        else if data.is_keyword("==") {
+        else if data.is_keyword("is") {
             data.increment(2);
             tokens.push(Token::Operator(BinaryOperator::IsEq))
         } else if data.is_keyword("!=") {
             data.increment(2);
             tokens.push(Token::Operator(BinaryOperator::IsNEq))
-        }
-        // number before operators to get neg nums
-        else if is_match(&next_data_str, &num_regex_result) {
-            let num = data
-                .re_find(&num_regex_result)
-                .unwrap_or("".to_string())
-                .to_string();
-            data.increment_by_str(num.clone());
-            tokens.push(Token::Number(num.parse().unwrap()));
         }
         // single char operators
         else if let Some(token) = match data.current_char() {
@@ -136,15 +127,21 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
             data.increment(1);
         }
         // keywords
-        else if data.is_keyword("throw") {
+        else if data.is_keyword("is") {
+            data.increment(2);
+            tokens.push(Token::Operator(BinaryOperator::IsEq))
+        } else if data.is_keyword("throw") {
             data.increment(5);
             tokens.push(Token::Throw);
         } else if data.is_keyword("do") {
             data.increment(2);
             tokens.push(Token::Do);
-        } else if data.is_keyword("proc") {
-            data.increment(4);
-            tokens.push(Token::Proc);
+        } else if data.is_keyword("run") {
+            data.increment(3);
+            tokens.push(Token::Run);
+        } else if data.is_keyword("given") {
+            data.increment(5);
+            tokens.push(Token::Given);
         } else if data.is_keyword("return") {
             data.increment(6);
             tokens.push(Token::Return);
@@ -157,18 +154,31 @@ pub fn tokenize(source_text: String) -> Result<Vec<Token>, TokenError> {
         } else if data.is_keyword("print") {
             data.increment(5);
             tokens.push(Token::Print);
-        } else if data.is_keyword("set") {
-            data.increment(3);
-            tokens.push(Token::Set);
+        } else if data.is_keyword("define") {
+            data.increment(6);
+            tokens.push(Token::Define);
         } else if data.is_keyword("if") {
             data.increment(2);
             tokens.push(Token::If);
         } else if data.is_keyword("else") {
             data.increment(4);
             tokens.push(Token::Else);
+        } else if data.is_keyword("with") {
+            data.increment(4);
+            tokens.push(Token::Else);
+        } else if data.is_keyword("to be") {
+            data.increment(5);
+            tokens.push(Token::ToBe);
         }
         // variable sequences ie numbers, symbols, strings
-        else if is_match(&next_data_str, &symbol_regex_result) {
+        else if is_match(&next_data_str, &num_regex_result) {
+            let num = data
+                .re_find(&num_regex_result)
+                .unwrap_or("".to_string())
+                .to_string();
+            data.increment_by_str(num.clone());
+            tokens.push(Token::Number(num.parse().unwrap()));
+        } else if is_match(&next_data_str, &symbol_regex_result) {
             if let Ok(symbol_name) = data.re_find(&symbol_regex_result) {
                 data.increment_by_str(symbol_name.clone());
                 tokens.push(Token::Symbol(symbol_name));

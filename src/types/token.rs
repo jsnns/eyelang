@@ -12,16 +12,18 @@ pub enum Token {
     RParen,
     LBrace,
     RBrace,
-    Semicolon,
-    Proc,
     Comma,
     Return,
     Print,
-    Set,
     If,
     Else,
     Do,
     Throw,
+    Given,
+    Define,
+    Semicolon,
+    ToBe,
+    Run,
 }
 
 impl Token {
@@ -47,7 +49,6 @@ impl std::string::ToString for Token {
             Token::Type(_) => "Type",
             Token::Str(_) => "Str",
             Token::Operator(..) => "Operator",
-            Token::Proc => "Proc",
             Token::Return => "Return",
             Token::Comma => "Comma",
             Token::LBrace => "{",
@@ -56,11 +57,14 @@ impl std::string::ToString for Token {
             Token::RParen => ")",
             Token::Semicolon => ";",
             Token::Print => "Print",
-            Token::Set => "Set",
             Token::If => "If",
             Token::Else => "Else",
             Token::Do => "Do",
             Token::Throw => "Throw",
+            Token::Given => "Given",
+            Token::Define => "Define",
+            Token::ToBe => "ToBe",
+            Token::Run => "Run",
         };
 
         str.to_string()

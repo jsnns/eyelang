@@ -3,7 +3,7 @@ use crate::types::symbol_store::Identifier;
 
 pub type Block = Vec<Box<AST>>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FunctionBody {
     pub body: Block,
     pub args: Vec<String>,

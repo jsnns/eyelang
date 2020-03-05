@@ -171,6 +171,7 @@ fn run_ast(
                 let args_requested = block.args.clone();
                 let args_given = args;
 
+                // make sure we get all of the arguments
                 assert_eq!(args_given.len(), args_requested.len());
 
                 for i in 0..args_requested.len() {
@@ -199,6 +200,7 @@ fn run_ast(
 
             Ok(None)
         }
+        // we hook into options.print_fn as it's a great way to setup a debugging harness
         AST::Print { value } => {
             if let Some(value) = run_ast(*value, symbols, options)? {
                 (options.print_fn)(value);

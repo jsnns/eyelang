@@ -3,3 +3,7 @@ use std::collections::HashMap;
 
 pub type Identifier = String;
 pub type SymbolStore = HashMap<Identifier, PrimitiveValue>;
+
+pub fn new() -> SymbolStore {
+    HashMap::new()
+}

@@ -97,7 +97,7 @@ impl ParseState {
 
         return self.maybe_binary(
             match self.current() {
-                Token::Proc => self.parse_proc(),
+                // Token::Define => self.parse_proc(),
                 Token::Return => {
                     self.next();
                     AST::Return {
@@ -139,9 +139,10 @@ impl ParseState {
                         value: Box::from(self.parse_atom()),
                     }
                 }
-                Token::Set => {
+                Token::Define => {
                     self.next();
-                    self.parse_set()
+                    self.parse_define()
+                    // self.parse_set()
                 }
                 Token::If => {
                     self.next();
@@ -150,6 +151,10 @@ impl ParseState {
                 Token::Do => {
                     self.next();
                     self.parse_do()
+                }
+                Token::Run => {
+                    self.next();
+                    self.parse_run()
                 }
                 Token::Throw => {
                     self.next();
@@ -162,6 +167,19 @@ impl ParseState {
                         panic!("Can't find message to throw!");
                     }
                 }
+                // handle negative numbers
+                Token::Operator(operator) => {
+                    if *operator == BinaryOperator::Subtract {
+                        // skip operator
+                        self.next();
+
+                        if let Token::Number(num) = self.current() {
+                            return AST::Number { value: -num };
+                        }
+                    }
+
+                    panic!("Can't apply operator {}", operator.to_string());
+                }
                 _ => panic!(
                     "parser::parse_atom unimplemented for {}",
                     self.current().to_string()
@@ -169,6 +187,50 @@ impl ParseState {
             },
             0,
         );
+    }
+
+    fn parse_run(&self) -> AST {
+        if let Token::Symbol(symbol) = self.current() {
+            // skip symbol
+            self.next();
+            // skip given token
+            let mut args: Vec<Box<AST>> = vec![];
+            if self.is_tok(&Token::Given) {
+                self.next();
+                self.skip(&Token::LParen);
+                args = self.parse_call_args();
+            }
+            AST::Call {
+                identifier: symbol.to_string(),
+                args: args,
+            }
+        } else {
+            panic!(
+                "Could not find function name to call found: {:?}",
+                self.current()
+            );
+        }
+    }
+
+    fn parse_define(&self) -> AST {
+        if let Token::Symbol(symbol) = self.current() {
+            // skip past symbol
+            self.next();
+
+            // assert the next token is "to be"
+            assert!(self.is_tok(&Token::ToBe));
+            self.next();
+
+            match self.current() {
+                // fn if next char is {
+                Token::LBrace => self.parse_proc(symbol),
+
+                // othersie it's a var
+                _ => self.parse_set(symbol),
+            }
+        } else {
+            panic!("Could not get symbol for define found {:?}", self.current());
+        }
     }
 
     fn parse_do(&self) -> AST {
@@ -220,27 +282,13 @@ impl ParseState {
     }
 
     fn parse_el(&self) -> Option<Vec<Box<AST>>> {
-        if self.is_tok(&Token::Else) {
-            self.skip(&Token::Else);
-            Some(self.parse_proc_body())
-        } else {
-            None
-        }
+        Some(self.parse_proc_body())
     }
 
-    fn parse_set(&self) -> AST {
-        if let Token::Symbol(symbol) = self.current() {
-            self.next();
-            self.skip(&Token::Operator(BinaryOperator::Assign));
-            AST::Assign {
-                identifier: symbol.to_string(),
-                value: Box::from(self.parse_atom()),
-            }
-        } else {
-            panic!(
-                "Can't determine symbol name for set at {:?}",
-                self.current()
-            );
+    fn parse_set(&self, symbol: &String) -> AST {
+        AST::Assign {
+            identifier: symbol.to_string(),
+            value: Box::from(self.parse_atom()),
         }
     }
 
@@ -266,37 +314,31 @@ impl ParseState {
     }
 
     fn parse_func_args(&self) -> Vec<String> {
-        self.skip(&Token::LParen);
         let mut tokens = vec![];
-
-        loop {
-            if let Token::Symbol(symbol) = self.current() {
-                self.next();
-                tokens.push(symbol.to_string());
-                self.skip(&Token::Comma);
-            } else {
-                break;
+        // args after given keyword
+        if self.is_tok(&Token::Given) {
+            // skip given
+            self.next();
+            self.skip(&Token::LParen);
+            loop {
+                if let Token::Symbol(symbol) = self.current() {
+                    self.next();
+                    tokens.push(symbol.to_string());
+                    self.skip(&Token::Comma);
+                } else {
+                    break;
+                }
             }
+            self.skip(&Token::RParen);
         }
-
-        self.skip(&Token::RParen);
         return tokens;
     }
 
-    fn parse_proc(&self) -> AST {
-        // check the next token is a symbol
-        if let Token::Symbol(proc_name) = self.next() {
-            self.next();
-            AST::Proc {
-                identifier: proc_name.to_string(),
-                args: self.parse_func_args(),
-                body: self.parse_proc_body(),
-            }
-        } else {
-            panic!(
-                "Cannot create function without name {}",
-                self.current().to_string()
-            )
+    fn parse_proc(&self, symbol: &String) -> AST {
+        AST::Proc {
+            identifier: symbol.to_string(),
+            body: self.parse_proc_body(),
+            args: self.parse_func_args(),
         }
     }
 

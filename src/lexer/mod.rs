@@ -10,7 +10,14 @@ mod tokens {
     fn neg_numbers() {
         let program = "-1;".to_string();
         let tokens = lexer::tokenize(program).unwrap();
-        assert_eq!(tokens, vec![Token::Number(-1), Token::Semicolon])
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Operator(BinaryOperator::Subtract),
+                Token::Number(1),
+                Token::Semicolon
+            ]
+        )
     }
     #[test]
     fn add_numbers() {
@@ -31,20 +38,19 @@ mod tokens {
 
     #[test]
     fn def_proc() {
-        let program = "proc a() {\nreturn false;\n}".to_string();
+        let program = "define a to be {return false;}".to_string();
         let tokens = lexer::tokenize(program).unwrap();
         assert_eq!(
             tokens,
             vec![
-                Token::Proc,
+                Token::Define,
                 Token::Symbol("a".to_string()),
-                Token::LParen,
-                Token::RParen,
+                Token::ToBe,
                 Token::LBrace,
                 Token::Return,
                 Token::Bool(false),
                 Token::Semicolon,
-                Token::RBrace
+                Token::RBrace,
             ]
         )
     }

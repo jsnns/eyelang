@@ -2,6 +2,7 @@ mod file;
 mod interpreter;
 mod lexer;
 mod parser;
+mod tests;
 mod types;
 
 use std::collections::HashMap;

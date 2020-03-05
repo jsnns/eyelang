@@ -1,8 +1,10 @@
 use crate::types::ast::FunctionBody;
 use crate::types::error::NotImplemented;
 
+type OperatorValue<T> = Result<T, NotImplemented>;
+
 #[allow(dead_code)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum PrimitiveValue {
     Str(String),
     Num(i32),
@@ -10,7 +12,16 @@ pub enum PrimitiveValue {
     Function(FunctionBody),
 }
 
-type OperatorValue<T> = Result<T, NotImplemented>;
+impl std::ops::Not for PrimitiveValue {
+    type Output = PrimitiveValue;
+    fn not(self) -> PrimitiveValue {
+        if let PrimitiveValue::Bool(val) = self {
+            PrimitiveValue::Bool(!val)
+        } else {
+            PrimitiveValue::Bool(false)
+        }
+    }
+}
 
 impl PrimitiveValue {
     pub fn add(self: Self, other: Self) -> OperatorValue<Self> {
@@ -68,6 +79,24 @@ impl PrimitiveValue {
             _ => Err(err_val),
         }
     }
+
+    #[allow(dead_code)]
+    pub fn assert_false(&self) {
+        PrimitiveValue::check(!self.clone());
+    }
+
+    #[allow(dead_code)]
+    pub fn assert(&self) {
+        PrimitiveValue::check(self.clone());
+    }
+
+    fn check(a: PrimitiveValue) {
+        if let PrimitiveValue::Bool(result) = a {
+            assert!(result);
+        } else {
+            panic!("Was not given a bool val.");
+        }
+    }
 }
 
 impl std::string::ToString for PrimitiveValue {
@@ -77,17 +106,6 @@ impl std::string::ToString for PrimitiveValue {
             PrimitiveValue::Str(val) => val.to_string(),
             PrimitiveValue::Num(val) => val.to_string(),
             PrimitiveValue::Function(block) => format!("({:?}):{{{:?}}}", block.args, block.body),
-        }
-    }
-}
-
-impl std::ops::Not for PrimitiveValue {
-    type Output = PrimitiveValue;
-    fn not(self) -> PrimitiveValue {
-        if let PrimitiveValue::Bool(val) = self {
-            PrimitiveValue::Bool(!val)
-        } else {
-            PrimitiveValue::Bool(false)
         }
     }
 }
@@ -142,32 +160,20 @@ mod tests {
     fn is_eq() {
         let a = PrimitiveValue::Num(2);
         let b = PrimitiveValue::Num(3);
-        check_false(a.clone().is_equal(b.clone()).unwrap());
-        check(a.clone().is_equal(a.clone()).unwrap());
+        a.clone().is_equal(b.clone()).unwrap().assert_false();
+        a.clone().is_equal(a.clone()).unwrap().assert();
 
         let a = PrimitiveValue::Str("a".to_string());
         let b = PrimitiveValue::Str("b".to_string());
-        check_false(a.is_equal(b).unwrap());
+        a.is_equal(b).unwrap().assert_false();
 
         let a = PrimitiveValue::Bool(true);
         let b = PrimitiveValue::Bool(false);
-        check_false(a.is_equal(b).unwrap());
+        a.is_equal(b).unwrap().assert_false();
     }
 
     #[test]
     fn not() {
-        check(!PrimitiveValue::Bool(false));
-    }
-
-    fn check_false(a: PrimitiveValue) {
-        check(!a);
-    }
-
-    fn check(a: PrimitiveValue) {
-        if let PrimitiveValue::Bool(result) = a {
-            assert!(result);
-        } else {
-            panic!("Was not given a bool val.");
-        }
+        (!PrimitiveValue::Bool(false)).assert();
     }
 }
