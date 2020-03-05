@@ -8,7 +8,7 @@
     "type": "github",
     "url": "https://github.com/jsnns/eyelang"
   },
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.42.0"
   },
