@@ -42,7 +42,7 @@ mod test {
             check_print(primitive_value::PrimitiveValue::Num(55))(a)
         }
         options.print_fn = print_fn;
-        interpret(program, symbol_store::new(), &options);
+        interpret(program, symbol_store::create_symbol_store(), &options);
     }
 
     fn setup_program(s: &str) -> ast::AST {

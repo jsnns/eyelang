@@ -5,9 +5,8 @@ mod parser;
 mod tests;
 mod types;
 
-use std::collections::HashMap;
 use types::options::Options;
-use types::symbol_store::SymbolStore;
+use types::symbol_store::create_symbol_store;
 
 fn main() {
     let root_dir = std::env::current_dir()
@@ -21,7 +20,7 @@ fn main() {
         let source_text = file::read_source_file(first_source_path, root_dir);
         if let Ok(tokens) = lexer::tokenize(source_text) {
             let ast = parser::build_program(tokens);
-            let symbols: SymbolStore = HashMap::new();
+            let symbols = create_symbol_store();
             interpreter::interpret(ast, symbols, &Options::default());
         }
     } else {
