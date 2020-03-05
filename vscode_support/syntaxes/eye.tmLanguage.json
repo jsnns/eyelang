@@ -23,7 +23,11 @@
       "patterns": [
         {
           "name": "keyword.control.eye",
-          "match": "\\b(print|return|set|if|else|do|throw)\\b"
+          "match": "\\b(print|return|set|if|else|do|throw|define|run|is)\\b"
+        },
+        {
+          "name": "string.interpolated",
+          "match": "\\b(to be|given)\\b"
         }
       ]
     },
@@ -57,10 +61,6 @@
     },
     "func": {
       "patterns": [
-        {
-          "name": "keyword.control.eye",
-          "match": "proc"
-        },
         {
           "name": "variable.name.eye",
           "begin": "\\bproc\\b",
